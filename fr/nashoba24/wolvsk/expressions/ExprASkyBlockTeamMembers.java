@@ -48,7 +48,7 @@ public class ExprASkyBlockTeamMembers extends SimpleExpression<OfflinePlayer>{
 		OfflinePlayer[] pl = new OfflinePlayer[list.size()];
 		Integer i = 0;
 		for(UUID uuid : list) {
-			pl[i] = fr.nashoba24.wolvsk.Main.getInstance().getServer().getOfflinePlayer(uuid);
+			pl[i] = fr.nashoba24.wolvsk.WolvSK.getInstance().getServer().getOfflinePlayer(uuid);
 			++i;
 		}
 		return pl;

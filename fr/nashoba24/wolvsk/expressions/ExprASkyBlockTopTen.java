@@ -46,7 +46,7 @@ public class ExprASkyBlockTopTen extends SimpleExpression<OfflinePlayer>{
 		Integer i = 0;
 		for (Entry<UUID, Integer> entry : list.entrySet())
 		{
-			pl[i] = fr.nashoba24.wolvsk.Main.getInstance().getServer().getOfflinePlayer(entry.getKey());
+			pl[i] = fr.nashoba24.wolvsk.WolvSK.getInstance().getServer().getOfflinePlayer(entry.getKey());
 			++i;
 		}
 		return pl;

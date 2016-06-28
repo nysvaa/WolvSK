@@ -41,7 +41,7 @@ public class ExprASkyBlockOwner extends SimpleExpression<OfflinePlayer>{
 	@Override
 	@Nullable
 	protected OfflinePlayer[] get(Event e) {
-		return new OfflinePlayer[]{ fr.nashoba24.wolvsk.Main.getInstance().getServer().getOfflinePlayer(ASkyBlockAPI.getInstance().getOwner(loc.getSingle(e))) };
+		return new OfflinePlayer[]{ fr.nashoba24.wolvsk.WolvSK.getInstance().getServer().getOfflinePlayer(ASkyBlockAPI.getInstance().getOwner(loc.getSingle(e))) };
 	}
 }
 

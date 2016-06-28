@@ -48,7 +48,7 @@ public class ExprASkyBlockTeamLeader extends SimpleExpression<OfflinePlayer>{
 			return null;
 		}
 		else {
-			return new OfflinePlayer[]{ fr.nashoba24.wolvsk.Main.getInstance().getServer().getOfflinePlayer(uuid) };
+			return new OfflinePlayer[]{ fr.nashoba24.wolvsk.WolvSK.getInstance().getServer().getOfflinePlayer(uuid) };
 		}
 	}
 }
