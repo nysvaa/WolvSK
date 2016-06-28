@@ -12,7 +12,6 @@ import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.util.SimpleEvent;
 import ch.njol.skript.registrations.EventValues;
 import ch.njol.skript.util.Getter;
-import fr.nashoba24.wolvmc.WolvMC;
 import fr.nashoba24.wolvmc.events.WolvMCInitEffectsEvent;
 import fr.nashoba24.wolvmc.events.WolvMCReloadEvent;
 import fr.nashoba24.wolvsk.conditions.CondCanUsePowerBlock;
@@ -55,8 +54,7 @@ public class Main extends JavaPlugin implements Listener {
 		   Bukkit.getPluginManager().registerEvents(new ExprNameOfBlock(), this);
 		   Skript.registerAddon(this);
 		   Skript.registerExpression(ExprNameOfBlock.class, String.class, ExpressionType.PROPERTY, "name of %block%", "%block%['s] name");
-		   Plugin plugin = WolvMC.getPlugin(WolvMC.class).getServer().getPluginManager().getPlugin("WolvMC");
-		   if (plugin != null && plugin instanceof WolvMC) {
+		   if (Bukkit.getServer().getPluginManager().getPlugin("WolvMC") != null) {
 				  Skript.registerEvent("WolvMC Reload", SimpleEvent.class, WolvMCReloadEvent.class, "wolvmc reload");
 				  Skript.registerEvent("WolvMC Init Effects", SimpleEvent.class, WolvMCInitEffectsEvent.class, "wolvmc init effect[s]"); //TODO getPlayer
 				  EventValues.registerEventValue(WolvMCInitEffectsEvent.class, Player.class, new Getter<Player, WolvMCInitEffectsEvent>() {

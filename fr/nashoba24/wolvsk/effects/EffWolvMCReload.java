@@ -3,6 +3,7 @@ package fr.nashoba24.wolvsk.effects;
 import javax.annotation.Nullable;
 
 import org.bukkit.event.Event;
+
 import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
