@@ -48,7 +48,7 @@ public class EffTSConnect extends Effect {
 		try {
 			final TS3Config config = new TS3Config();
 			config.setHost(host.getSingle(e));
-			config.setDebugLevel(Level.ALL);
+			config.setDebugLevel(Level.OFF);
 			if(port.getSingle(e)==1) {
 				config.setQueryPort(10011);
 			}
