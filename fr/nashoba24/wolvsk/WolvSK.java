@@ -50,6 +50,13 @@ import fr.nashoba24.wolvsk.essentials.ExprEssentialsHome;
 import fr.nashoba24.wolvsk.essentials.ExprEssentialsHomes;
 import fr.nashoba24.wolvsk.essentials.ExprEssentialsLogoutLocation;
 import fr.nashoba24.wolvsk.misc.ExprNameOfBlock;
+import fr.nashoba24.wolvsk.supertrails.EffSuperTrailsHideTrails;
+import fr.nashoba24.wolvsk.supertrails.EffSuperTrailsOpenMenu;
+import fr.nashoba24.wolvsk.supertrails.EffSuperTrailsRevealTrails;
+import fr.nashoba24.wolvsk.supertrails.EffSuperTrailsSetWings;
+import fr.nashoba24.wolvsk.supertrails.ExprSuperTrailsTrail;
+import fr.nashoba24.wolvsk.supertrails.ExprSuperTrailsType;
+import fr.nashoba24.wolvsk.supertrails.ExprSuperTrailsWingsColor;
 import fr.nashoba24.wolvsk.teamspeak.CondTSIsOnline;
 import fr.nashoba24.wolvsk.teamspeak.CondTSIsQuery;
 import fr.nashoba24.wolvsk.teamspeak.EffTSBan;
@@ -286,6 +293,15 @@ public class WolvSK extends JavaPlugin implements Listener {
 			   Skript.registerExpression(ExprEssentialsHome.class, Location.class, ExpressionType.PROPERTY, "home %string% of %player%", "%player%['s] home %string%");
 			   Skript.registerExpression(ExprEssentialsHome.class, Location.class, ExpressionType.PROPERTY, "home of %player%", "%player%['s] home");
 			   Skript.registerExpression(ExprEssentialsLogoutLocation.class, Location.class, ExpressionType.PROPERTY, "log[ ]out[ location] of %player%", "%player%['s] log[ ]out[ location]");
+		   }
+		   if (Bukkit.getServer().getPluginManager().getPlugin("SuperTrails") != null) {
+			   Skript.registerEffect(EffSuperTrailsHideTrails.class, "hide (trail[s]|wing[s]) to %player%");
+			   Skript.registerEffect(EffSuperTrailsOpenMenu.class, "open (supertrails|st) (menu|gui|inv[entory]) %string% to %player%"); 
+			   Skript.registerEffect(EffSuperTrailsRevealTrails.class, "reveal (trail[s]|wing[s]) to %player%"); 
+			   Skript.registerEffect(EffSuperTrailsSetWings.class, "set wing[s] of %player% to[ color[s]] %string%, %string%(,| and) %string%");
+			   Skript.registerExpression(ExprSuperTrailsTrail.class, Integer.class, ExpressionType.PROPERTY, "(trail[s]|wing[s]) of %player%", "%player%['s] (trail[s]|wing[s])");
+			   Skript.registerExpression(ExprSuperTrailsWingsColor.class, String.class, ExpressionType.PROPERTY, "wing[s] color %integer% of %player%", "color %integer% of wing[s] of %player%", "%player%['s] wing[s] color %integer%");
+			   Skript.registerExpression(ExprSuperTrailsType.class, String.class, ExpressionType.PROPERTY, "wing[s] type of %player%", "%player%['s] wing[s] type");
 		   }
 		   Bukkit.getLogger().info(ChatColor.translateAlternateColorCodes('&', "&aWolvSK Enabled!"));
 	  }
