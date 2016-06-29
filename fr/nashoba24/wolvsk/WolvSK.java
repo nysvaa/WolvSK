@@ -124,11 +124,11 @@ public class WolvSK extends JavaPlugin implements Listener {
 		   Skript.registerEffect(EffTSSendPV.class, "(teamspeak|ts[3])[ server][ send] (private|pv) (message|msg) %string%[ to][ client] %string%");
 		   Skript.registerCondition(CondTSIsOnline.class, "(teamspeak|ts[3]) client %string% is online");
 		   Skript.registerCondition(CondTSIsQuery.class, "(teamspeak|ts[3])['s] addon is connected", "[the] addon is connect[ed] to (teamspeak|ts[3])");
-		   Skript.registerExpression(ExprTSClientID.class, Integer.class, ExpressionType.PROPERTY, "(teamspeak|ts[3]) id of[ client]%string%");
-		   Skript.registerExpression(ExprTSDescription.class, String.class, ExpressionType.PROPERTY, "(teamspeak|ts[3]) description of[ client]%string%"); //TODO On ne peux pas la get
-		   Skript.registerExpression(ExprTSIP.class, String.class, ExpressionType.PROPERTY, "(teamspeak|ts[3]) ip of[ client]%string%"); 
+		   Skript.registerExpression(ExprTSClientID.class, Integer.class, ExpressionType.PROPERTY, "(teamspeak|ts[3]) id of[ client] %string%");
+		   Skript.registerExpression(ExprTSDescription.class, String.class, ExpressionType.PROPERTY, "(teamspeak|ts[3]) description of[ client] %string%"); //TODO On ne peux pas la get
+		   Skript.registerExpression(ExprTSIP.class, String.class, ExpressionType.PROPERTY, "(teamspeak|ts[3]) ip of[ client] %string%"); 
 		   Skript.registerExpression(ExprTSIPSList.class, String.class, ExpressionType.PROPERTY, "(teamspeak|ts[3])[ client[s]] correspond[ing][s] to ip %string%", "(teamspeak|ts[3]) ip[s] correspond[ing][s] to %string%");
-		   Skript.registerExpression(ExprTSNickname.class, String.class, ExpressionType.PROPERTY, "(teamspeak|ts[3]) (nickname|nick|name) of[ client]%string%");
+		   Skript.registerExpression(ExprTSNickname.class, String.class, ExpressionType.PROPERTY, "(teamspeak|ts[3]) (nickname|nick|name) of[ client] %string%");
 		   Skript.registerExpression(ExprTSClients.class, String.class, ExpressionType.PROPERTY, "(teamspeak|ts[3]) client[s] (online[s]|connect[ed])");
 		   if (Bukkit.getServer().getPluginManager().getPlugin("WolvMC") != null) {
 				  Skript.registerEvent("WolvMC Reload", SimpleEvent.class, WolvMCReloadEvent.class, "wolvmc reload");
