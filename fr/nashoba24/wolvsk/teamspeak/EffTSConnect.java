@@ -24,6 +24,7 @@ public class EffTSConnect extends Effect {
 	private Expression<String> login;
 	private Expression<String> password;
 	private Expression<Integer> port;
+	private boolean debug = false;
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -34,6 +35,9 @@ public class EffTSConnect extends Effect {
 		password = (Expression<String>) expr[3];
 		if(expr.length==5) {
 			port = (Expression<Integer>) expr[4];
+		}
+		if(matchedPattern==1) {
+			debug = true;
 		}
 		return true;
 	}
@@ -48,7 +52,12 @@ public class EffTSConnect extends Effect {
 		try {
 			final TS3Config config = new TS3Config();
 			config.setHost(host.getSingle(e));
-			config.setDebugLevel(Level.OFF);
+			if(debug) {
+				config.setDebugLevel(Level.ALL);
+			}
+			else {
+				config.setDebugLevel(Level.OFF);
+			}
 			if(port.getSingle(e)==1) {
 				config.setQueryPort(10011);
 			}
@@ -65,6 +74,8 @@ public class EffTSConnect extends Effect {
 		}
 		catch (TS3ConnectionFailedException e1) {
 			WolvSK.getInstance().getLogger().warning("Tried to connect to " + host + " but don't succeed");
+			fr.nashoba24.wolvsk.WolvSK.ts3query = null;
+			fr.nashoba24.wolvsk.WolvSK.ts3api = null;
 			return;
 		}
 	}

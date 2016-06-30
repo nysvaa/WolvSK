@@ -1,7 +1,22 @@
 package fr.nashoba24.wolvsk;
 
+import javax.annotation.Nullable;
+
 import net.ess3.api.events.AfkStatusChangeEvent;
 import net.ess3.api.events.UserBalanceUpdateEvent;
+import net.slipcor.pvparena.arena.Arena;
+import net.slipcor.pvparena.events.PADeathEvent;
+import net.slipcor.pvparena.events.PAEndEvent;
+import net.slipcor.pvparena.events.PAExitEvent;
+import net.slipcor.pvparena.events.PAJoinEvent;
+import net.slipcor.pvparena.events.PAKillEvent;
+import net.slipcor.pvparena.events.PALeaveEvent;
+import net.slipcor.pvparena.events.PALoseEvent;
+import net.slipcor.pvparena.events.PAPlayerClassChangeEvent;
+import net.slipcor.pvparena.events.PAStartEvent;
+import net.slipcor.pvparena.events.PATeamChangeEvent;
+import net.slipcor.pvparena.events.PAWinEvent;
+import net.slipcor.pvparena.managers.ArenaManager;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -23,8 +38,12 @@ import com.wasteofplastic.askyblock.events.IslandNewEvent;
 import com.wasteofplastic.askyblock.events.IslandResetEvent;
 
 import ch.njol.skript.Skript;
+import ch.njol.skript.classes.ClassInfo;
+import ch.njol.skript.classes.Parser;
 import ch.njol.skript.lang.ExpressionType;
+import ch.njol.skript.lang.ParseContext;
 import ch.njol.skript.lang.util.SimpleEvent;
+import ch.njol.skript.registrations.Classes;
 import ch.njol.skript.registrations.EventValues;
 import ch.njol.skript.util.Getter;
 import fr.nashoba24.wolvmc.events.WolvMCInitEffectsEvent;
@@ -50,6 +69,9 @@ import fr.nashoba24.wolvsk.essentials.ExprEssentialsHome;
 import fr.nashoba24.wolvsk.essentials.ExprEssentialsHomes;
 import fr.nashoba24.wolvsk.essentials.ExprEssentialsLogoutLocation;
 import fr.nashoba24.wolvsk.misc.ExprNameOfBlock;
+import fr.nashoba24.wolvsk.pvparena.EffPVPArenaRemoveArena;
+import fr.nashoba24.wolvsk.pvparena.ExprPVPArenaArena;
+import fr.nashoba24.wolvsk.pvparena.ExprPVPArenaPlayerArena;
 import fr.nashoba24.wolvsk.supertrails.EffSuperTrailsHideTrails;
 import fr.nashoba24.wolvsk.supertrails.EffSuperTrailsOpenMenu;
 import fr.nashoba24.wolvsk.supertrails.EffSuperTrailsRevealTrails;
@@ -116,9 +138,10 @@ public class WolvSK extends JavaPlugin implements Listener {
 	  {
 		   instance = this;
 		   Bukkit.getPluginManager().registerEvents(new ExprNameOfBlock(), this);
+		   Bukkit.getPluginManager().registerEvents(this, this);
 		   Skript.registerAddon(this);
 		   Skript.registerExpression(ExprNameOfBlock.class, String.class, ExpressionType.PROPERTY, "name of %block%", "%block%['s] name");
-		   Skript.registerEffect(EffTSConnect.class, "(teamspeak|ts[3])[ server] connect to %string% with user %string% and (login|credentials) %string%, %string%[ on query port %integer%]");
+		   Skript.registerEffect(EffTSConnect.class, "(teamspeak|ts[3])[ server] connect to %string% with user %string% and (login|credentials) %string%, %string%[ on query port %integer%]", "(teamspeak|ts[3])[ server] debug connect to %string% with user %string% and (login|credentials) %string%, %string%[ on query port %integer%]");
 		   Skript.registerEffect(EffTSDisconnect.class, "(teamspeak|ts[3])[ server] disconnect");
 		   Skript.registerEffect(EffTSSendChannelMessage.class, "(teamspeak|ts[3])[ server][ send] channel (message|msg) %string%[ (in|to) channel id %integer%]");
 		   Skript.registerEffect(EffTSBroadcastMessage.class, "(teamspeak|ts[3])[ server][ send] broadcast[ message] %string%");
@@ -302,6 +325,156 @@ public class WolvSK extends JavaPlugin implements Listener {
 			   Skript.registerExpression(ExprSuperTrailsTrail.class, Integer.class, ExpressionType.PROPERTY, "(trail[s]|wing[s]) of %player%", "%player%['s] (trail[s]|wing[s])");
 			   Skript.registerExpression(ExprSuperTrailsWingsColor.class, String.class, ExpressionType.PROPERTY, "wing[s] color %integer% of %player%", "color %integer% of wing[s] of %player%", "%player%['s] wing[s] color %integer%");
 			   Skript.registerExpression(ExprSuperTrailsType.class, String.class, ExpressionType.PROPERTY, "wing[s] type of %player%", "%player%['s] wing[s] type");
+		   }
+		   if (Bukkit.getServer().getPluginManager().getPlugin("pvparena") != null) {
+			   Classes.registerClass(new ClassInfo<Arena>(Arena.class, "arena").user("arena").name("pvparena").parser(new Parser<Arena>() {
+
+				@Override
+				public String getVariableNamePattern() {
+					return ".+";
+				}
+
+				@Override
+				@Nullable
+				public Arena parse(String arg0, ParseContext arg1) {
+					return ArenaManager.getArenaByName(arg0);
+				}
+
+				@Override
+				public String toString(Arena arg0, int arg1) {
+					return arg0.toString();
+				}
+
+				@Override
+				public String toVariableNameString(Arena arg0) {
+					return arg0.toString();
+				}
+			   
+			   }));
+			   Skript.registerEvent("pvparena death event", SimpleEvent.class, PADeathEvent.class, "(pa|pvparena|arena) death");
+			   EventValues.registerEventValue(PADeathEvent.class, Player.class, new Getter<Player, PADeathEvent>() {
+				   public Player get(PADeathEvent e) {
+					   return e.getPlayer();
+				   }
+			   }, 0);
+			   EventValues.registerEventValue(PADeathEvent.class, Arena.class, new Getter<Arena, PADeathEvent>() {
+				   public Arena get(PADeathEvent e) {
+					   return e.getArena();
+				   }
+			   }, 0);
+			   Skript.registerEvent("pvparena end event", SimpleEvent.class, PAEndEvent.class, "(pa|pvparena|arena) end");
+			   EventValues.registerEventValue(PAEndEvent.class, Arena.class, new Getter<Arena, PAEndEvent>() {
+				   public Arena get(PAEndEvent e) {
+					   return e.getArena();
+				   }
+			   }, 0);
+			   Skript.registerEvent("pvparena exit event", SimpleEvent.class, PAExitEvent.class, "(pa|pvparena|arena) exit");
+			   EventValues.registerEventValue(PAExitEvent.class, Player.class, new Getter<Player, PAExitEvent>() {
+				   public Player get(PAExitEvent e) {
+					   return e.getPlayer();
+				   }
+			   }, 0);
+			   EventValues.registerEventValue(PAExitEvent.class, Arena.class, new Getter<Arena, PAExitEvent>() {
+				   public Arena get(PAExitEvent e) {
+					   return e.getArena();
+				   }
+			   }, 0);
+			   Skript.registerEvent("pvparena join event", SimpleEvent.class, PAJoinEvent.class, "(pa|pvparena|arena) join");
+			   EventValues.registerEventValue(PAJoinEvent.class, Player.class, new Getter<Player, PAJoinEvent>() {
+				   public Player get(PAJoinEvent e) {
+					   return e.getPlayer();
+				   }
+			   }, 0);
+			   EventValues.registerEventValue(PAJoinEvent.class, Arena.class, new Getter<Arena, PAJoinEvent>() {
+				   public Arena get(PAJoinEvent e) {
+					   return e.getArena();
+				   }
+			   }, 0);
+			   Skript.registerEvent("pvparena kill event", SimpleEvent.class, PAKillEvent.class, "(pa|pvparena|arena) kill");
+			   EventValues.registerEventValue(PAKillEvent.class, Player.class, new Getter<Player, PAKillEvent>() {
+				   public Player get(PAKillEvent e) {
+					   return e.getPlayer();
+				   }
+			   }, 0);
+			   EventValues.registerEventValue(PAKillEvent.class, Arena.class, new Getter<Arena, PAKillEvent>() {
+				   public Arena get(PAKillEvent e) {
+					   return e.getArena();
+				   }
+			   }, 0);
+			   Skript.registerEvent("pvparena leave event", SimpleEvent.class, PALeaveEvent.class, "(pa|pvparena|arena) leave");
+			   EventValues.registerEventValue(PALeaveEvent.class, Player.class, new Getter<Player, PALeaveEvent>() {
+				   public Player get(PALeaveEvent e) {
+					   return e.getPlayer();
+				   }
+			   }, 0);
+			   EventValues.registerEventValue(PALeaveEvent.class, Arena.class, new Getter<Arena, PALeaveEvent>() {
+				   public Arena get(PALeaveEvent e) {
+					   return e.getArena();
+				   }
+			   }, 0);
+			   Skript.registerEvent("pvparena lose event", SimpleEvent.class, PALoseEvent.class, "(pa|pvparena|arena) lose");
+			   EventValues.registerEventValue(PALoseEvent.class, Player.class, new Getter<Player, PALoseEvent>() {
+				   public Player get(PALoseEvent e) {
+					   return e.getPlayer();
+				   }
+			   }, 0);
+			   EventValues.registerEventValue(PALoseEvent.class, Arena.class, new Getter<Arena, PALoseEvent>() {
+				   public Arena get(PALoseEvent e) {
+					   return e.getArena();
+				   }
+			   }, 0);
+			   Skript.registerEvent("pvparena player class change event", SimpleEvent.class, PAPlayerClassChangeEvent.class, "(pa|pvparena|arena)[ player] class change");
+			   EventValues.registerEventValue(PAPlayerClassChangeEvent.class, Player.class, new Getter<Player, PAPlayerClassChangeEvent>() {
+				   public Player get(PAPlayerClassChangeEvent e) {
+					   return e.getPlayer();
+				   }
+			   }, 0);
+			   EventValues.registerEventValue(PAPlayerClassChangeEvent.class, Arena.class, new Getter<Arena, PAPlayerClassChangeEvent>() {
+				   public Arena get(PAPlayerClassChangeEvent e) {
+					   return e.getArena();
+				   }
+			   }, 0);
+			   EventValues.registerEventValue(PAPlayerClassChangeEvent.class, String.class, new Getter<String, PAPlayerClassChangeEvent>() {
+				   public String get(PAPlayerClassChangeEvent e) {
+					   return e.getArenaClass().getName();
+				   }
+			   }, 0);
+			   Skript.registerEvent("pvparena start event", SimpleEvent.class, PAStartEvent.class, "(pa|pvparena|arena) start");
+			   EventValues.registerEventValue(PAStartEvent.class, Arena.class, new Getter<Arena, PAStartEvent>() {
+				   public Arena get(PAStartEvent e) {
+					   return e.getArena();
+				   }
+			   }, 0);
+			   Skript.registerEvent("pvparena team change event", SimpleEvent.class, PATeamChangeEvent.class, "(pa|pvparena|arena)[ player] team change");
+			   EventValues.registerEventValue(PATeamChangeEvent.class, Player.class, new Getter<Player, PATeamChangeEvent>() {
+				   public Player get(PATeamChangeEvent e) {
+					   return e.getPlayer();
+				   }
+			   }, 0);
+			   EventValues.registerEventValue(PATeamChangeEvent.class, Arena.class, new Getter<Arena, PATeamChangeEvent>() {
+				   public Arena get(PATeamChangeEvent e) {
+					   return e.getArena();
+				   }
+			   }, 0);
+			   EventValues.registerEventValue(PATeamChangeEvent.class, String.class, new Getter<String, PATeamChangeEvent>() {
+				   public String get(PATeamChangeEvent e) {
+					   return e.getTo().getName();
+				   }
+			   }, 0);
+			   Skript.registerEvent("pvparena win event", SimpleEvent.class, PAWinEvent.class, "(pa|pvparena|arena) win");
+			   EventValues.registerEventValue(PAWinEvent.class, Player.class, new Getter<Player, PAWinEvent>() {
+				   public Player get(PAWinEvent e) {
+					   return e.getPlayer();
+				   }
+			   }, 0);
+			   EventValues.registerEventValue(PAWinEvent.class, Arena.class, new Getter<Arena, PAWinEvent>() {
+				   public Arena get(PAWinEvent e) {
+					   return e.getArena();
+				   }
+			   }, 0);
+			   Skript.registerExpression(ExprPVPArenaArena.class, Arena.class, ExpressionType.PROPERTY, "([pvp[ ]]arena|pa) %string%");
+			   Skript.registerExpression(ExprPVPArenaPlayerArena.class, Arena.class, ExpressionType.PROPERTY, "([pvp[ ]]arena|pa) of %player%", "%player%['s] ([pvp[ ]]arena|pa)");
+			   Skript.registerEffect(EffPVPArenaRemoveArena.class, "remove ([pvp[ ]]arena|pa) %arena%");
 		   }
 		   Bukkit.getLogger().info(ChatColor.translateAlternateColorCodes('&', "&aWolvSK Enabled!"));
 	  }
