@@ -1,5 +1,7 @@
 package fr.nashoba24.wolvsk;
 
+import java.util.HashMap;
+
 import javax.annotation.Nullable;
 
 import net.ess3.api.events.AfkStatusChangeEvent;
@@ -46,6 +48,7 @@ import ch.njol.skript.lang.util.SimpleEvent;
 import ch.njol.skript.registrations.Classes;
 import ch.njol.skript.registrations.EventValues;
 import ch.njol.skript.util.Getter;
+import ch.njol.skript.util.Timespan;
 import fr.nashoba24.wolvmc.events.WolvMCInitEffectsEvent;
 import fr.nashoba24.wolvmc.events.WolvMCReloadEvent;
 import fr.nashoba24.wolvsk.askyblock.CondASkyBlockHasIsland;
@@ -68,8 +71,16 @@ import fr.nashoba24.wolvsk.essentials.CondEssentialsAFK;
 import fr.nashoba24.wolvsk.essentials.ExprEssentialsHome;
 import fr.nashoba24.wolvsk.essentials.ExprEssentialsHomes;
 import fr.nashoba24.wolvsk.essentials.ExprEssentialsLogoutLocation;
+import fr.nashoba24.wolvsk.guardianbeamapi.EffCreateBeam;
+import fr.nashoba24.wolvsk.guardianbeamapi.EffStopBeam;
+import fr.nashoba24.wolvsk.guardianbeamapi.ExprEndPositionBeam;
+import fr.nashoba24.wolvsk.guardianbeamapi.ExprStartPositionBeam;
+import fr.nashoba24.wolvsk.misc.CondCooldownFinish;
 import fr.nashoba24.wolvsk.misc.CondEven;
 import fr.nashoba24.wolvsk.misc.CondOdd;
+import fr.nashoba24.wolvsk.misc.EffCreateCooldown;
+import fr.nashoba24.wolvsk.misc.ExprBlockPower;
+import fr.nashoba24.wolvsk.misc.ExprCooldownLeftTime;
 import fr.nashoba24.wolvsk.misc.ExprCountry;
 import fr.nashoba24.wolvsk.misc.ExprNameOfBlock;
 import fr.nashoba24.wolvsk.pvparena.EffPVPArenaRemoveArena;
@@ -129,6 +140,7 @@ public class WolvSK extends JavaPlugin implements Listener {
 	private static WolvSK instance;
 	public static TS3Query ts3query;
 	public static TS3Api ts3api;
+	public static HashMap<String, Long> cooldowns = new HashMap<String, Long>();
 	  
 	  @Override
 	  public void onDisable()
@@ -144,8 +156,12 @@ public class WolvSK extends JavaPlugin implements Listener {
 		   Bukkit.getPluginManager().registerEvents(this, this);
 		   Skript.registerAddon(this);
 		   Skript.registerExpression(ExprNameOfBlock.class, String.class, ExpressionType.PROPERTY, "name of %block%", "%block%['s] name");
+		   Skript.registerExpression(ExprBlockPower.class, Integer.class, ExpressionType.PROPERTY, "power of %block%", "%block%['s] power");
 		   Skript.registerCondition(CondOdd.class, "%number% is odd");
 		   Skript.registerCondition(CondEven.class, "%number% is even");
+		   Skript.registerCondition(CondCooldownFinish.class, "cooldown %string% is finish", "cooldown %string% of %player% is finish");
+		   Skript.registerEffect(EffCreateCooldown.class, "create cooldown %string% for %timespan%", "create cooldown %string% (for|of) %player% for %timespan%");
+		   Skript.registerExpression(ExprCooldownLeftTime.class, Timespan.class, ExpressionType.PROPERTY, "cooldown[ left][ time] %string%", "cooldown[ left][ time] %string% of %player%");
 		   Skript.registerExpression(ExprCountry.class, String.class, ExpressionType.PROPERTY, "country of ip %string%", "country of %player%", "country code of ip %string%", "country code of %player%", "ip %string%['s] country", "%player%['s] country", "ip %string%['s] country code", "%player%['s] country code");
 		   Skript.registerEffect(EffTSConnect.class, "(teamspeak|ts[3])[ server] connect to %string% with user %string% and (login|credentials) %string%, %string%[ on query port %integer%]", "(teamspeak|ts[3])[ server] debug connect to %string% with user %string% and (login|credentials) %string%, %string%[ on query port %integer%]");
 		   Skript.registerEffect(EffTSDisconnect.class, "(teamspeak|ts[3])[ server] disconnect");
@@ -481,6 +497,12 @@ public class WolvSK extends JavaPlugin implements Listener {
 			   Skript.registerExpression(ExprPVPArenaArena.class, Arena.class, ExpressionType.PROPERTY, "([pvp[ ]]arena|pa) %string%");
 			   Skript.registerExpression(ExprPVPArenaPlayerArena.class, Arena.class, ExpressionType.PROPERTY, "([pvp[ ]]arena|pa) of %player%", "%player%['s] ([pvp[ ]]arena|pa)");
 			   Skript.registerEffect(EffPVPArenaRemoveArena.class, "remove ([pvp[ ]]arena|pa) %arena%");
+		   }
+		   if (Bukkit.getServer().getPluginManager().getPlugin("GuardianBeamAPI") != null && Bukkit.getServer().getPluginManager().getPlugin("ProtocolLib") != null) {
+			   Skript.registerExpression(ExprStartPositionBeam.class, Location.class, ExpressionType.PROPERTY, "start[ing] location of[ guardian] beam[ with id] %string%");
+			   Skript.registerExpression(ExprEndPositionBeam.class, Location.class, ExpressionType.PROPERTY, "end[ing] location of[ guardian] beam[ with id] %string%");
+			   Skript.registerEffect(EffCreateBeam.class, "create[ guardian] beam (from|between) %location% (to|and) %location% (with id|named) %string%", "create[ guardian] beam (with id|named) %string% (from|between) %location% (to|and) %location%");
+			   Skript.registerEffect(EffStopBeam.class, "stop[ guardian] beam (with id|named) %string%");
 		   }
 		   Bukkit.getLogger().info(ChatColor.translateAlternateColorCodes('&', "&aWolvSK Enabled!"));
 	  }
