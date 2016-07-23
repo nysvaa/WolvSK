@@ -39,10 +39,20 @@ public class Minigame {
 		}
 		if(arena.getMinigame()==this) {
 			arenas.add(arena);
+			Minigames.save(arena.getMinigame());
 			return true;
 		}
 		else {
 			return false;
+		}
+	}
+	
+	public void removeArena(Arena arena, boolean save) {
+		if(arenas.contains(arena)) {
+			arenas.remove(arena);
+			if(save) {
+				Minigames.save(arena.getMinigame());
+			}
 		}
 	}
 	

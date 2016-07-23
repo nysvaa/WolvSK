@@ -31,6 +31,6 @@ public class EffCreateMinigame extends Effect {
 	
 	@Override
 	protected void execute(Event e) {
-		Minigames.createMinigame(name.getSingle(e), cmd.getSingle(e), prefix.getSingle(e));
+		Minigames.createMinigame(name.getSingle(e), cmd.getSingle(e), prefix.getSingle(e), true);
 	}
 }
