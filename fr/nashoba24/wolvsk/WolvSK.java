@@ -28,9 +28,12 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.messaging.PluginMessageListener;
 
 import com.github.theholywaffle.teamspeak3.TS3Api;
 import com.github.theholywaffle.teamspeak3.TS3Query;
+import com.google.common.io.ByteArrayDataInput;
+import com.google.common.io.ByteStreams;
 import com.wasteofplastic.askyblock.events.CoopJoinEvent;
 import com.wasteofplastic.askyblock.events.CoopLeaveEvent;
 import com.wasteofplastic.askyblock.events.IslandEnterEvent;
@@ -68,6 +71,8 @@ import fr.nashoba24.wolvsk.askyblock.ExprASkyBlockTeamMembers;
 import fr.nashoba24.wolvsk.askyblock.ExprASkyBlockTopTen;
 import fr.nashoba24.wolvsk.askyblock.ExprASkyBlockWarp;
 import fr.nashoba24.wolvsk.essentials.CondEssentialsAFK;
+import fr.nashoba24.wolvsk.essentials.CondEssentialsGodMode;
+import fr.nashoba24.wolvsk.essentials.CondEssentialsVanish;
 import fr.nashoba24.wolvsk.essentials.ExprEssentialsHome;
 import fr.nashoba24.wolvsk.essentials.ExprEssentialsHomes;
 import fr.nashoba24.wolvsk.essentials.ExprEssentialsLogoutLocation;
@@ -75,6 +80,7 @@ import fr.nashoba24.wolvsk.guardianbeamapi.EffCreateBeam;
 import fr.nashoba24.wolvsk.guardianbeamapi.EffStopBeam;
 import fr.nashoba24.wolvsk.guardianbeamapi.ExprEndPositionBeam;
 import fr.nashoba24.wolvsk.guardianbeamapi.ExprStartPositionBeam;
+import fr.nashoba24.wolvsk.minigames.Minigames;
 import fr.nashoba24.wolvsk.misc.CondCooldownFinish;
 import fr.nashoba24.wolvsk.misc.CondEven;
 import fr.nashoba24.wolvsk.misc.CondOdd;
@@ -86,6 +92,10 @@ import fr.nashoba24.wolvsk.misc.ExprNameOfBlock;
 import fr.nashoba24.wolvsk.pvparena.EffPVPArenaRemoveArena;
 import fr.nashoba24.wolvsk.pvparena.ExprPVPArenaArena;
 import fr.nashoba24.wolvsk.pvparena.ExprPVPArenaPlayerArena;
+import fr.nashoba24.wolvsk.serverquery.ExprCountServer;
+import fr.nashoba24.wolvsk.serverquery.ExprServerMOTD;
+import fr.nashoba24.wolvsk.serverquery.ExprServerMaxPlayers;
+import fr.nashoba24.wolvsk.serverquery.ExprServerVersion;
 import fr.nashoba24.wolvsk.supertrails.EffSuperTrailsHideTrails;
 import fr.nashoba24.wolvsk.supertrails.EffSuperTrailsOpenMenu;
 import fr.nashoba24.wolvsk.supertrails.EffSuperTrailsRevealTrails;
@@ -135,7 +145,7 @@ import fr.nashoba24.wolvsk.wolvmc.ExprWolvMCPlayTime;
 import fr.nashoba24.wolvsk.wolvmc.ExprWolvMCPrefixRace;
 import fr.nashoba24.wolvsk.wolvmc.ExprWolvMCRaceOfPlayer;
 
-public class WolvSK extends JavaPlugin implements Listener {
+public class WolvSK extends JavaPlugin implements Listener, PluginMessageListener {
 	
 	private static WolvSK instance;
 	public static TS3Query ts3query;
@@ -145,7 +155,7 @@ public class WolvSK extends JavaPlugin implements Listener {
 	  @Override
 	  public void onDisable()
 	  {
-	    Bukkit.getLogger().info(ChatColor.translateAlternateColorCodes('&', "&bWolvSK Disabled!"));
+		  Bukkit.getLogger().info(ChatColor.translateAlternateColorCodes('&', "&bWolvSK Disabled!"));
 	  }
 	  
 	  @Override
@@ -153,9 +163,16 @@ public class WolvSK extends JavaPlugin implements Listener {
 	  {
 		   instance = this;
 		   Bukkit.getPluginManager().registerEvents(new ExprNameOfBlock(), this);
+		   Bukkit.getPluginManager().registerEvents(new Minigames(), this);
 		   Bukkit.getPluginManager().registerEvents(this, this);
 		   Skript.registerAddon(this);
+		   Minigames.registerAll();
+		   getCommand("minigames").setExecutor(new Minigames());
 		   Skript.registerExpression(ExprNameOfBlock.class, String.class, ExpressionType.PROPERTY, "name of %block%", "%block%['s] name");
+		   Skript.registerExpression(ExprCountServer.class, Integer.class, ExpressionType.PROPERTY, "(number of player[s]|player[s] count) (on|in|of) server[ with ip] %string%");
+		   Skript.registerExpression(ExprServerMaxPlayers.class, Integer.class, ExpressionType.PROPERTY, "max[imum][ of] player[s] (on|in|of|for) server[ with ip] %string%");
+		   Skript.registerExpression(ExprServerMOTD.class, String.class, ExpressionType.PROPERTY, "motd (of|for) server[ with ip] %string%");
+		   Skript.registerExpression(ExprServerVersion.class, String.class, ExpressionType.PROPERTY, "version (of|for) server[ with ip] %string%");
 		   Skript.registerExpression(ExprBlockPower.class, Integer.class, ExpressionType.PROPERTY, "power of %block%", "%block%['s] power");
 		   Skript.registerCondition(CondOdd.class, "%number% is odd");
 		   Skript.registerCondition(CondEven.class, "%number% is even");
@@ -215,6 +232,7 @@ public class WolvSK extends JavaPlugin implements Listener {
 				  Skript.registerEffect(EffWolvMCOpenChooseInv.class, "open choose inv[entory] to %player%");
 				  Skript.registerEffect(EffWolvMCSaveData.class, "save data[s] of %player%");
 				  Skript.registerEffect(EffWolvMCSaveData.class, "wolvmc reload");
+				  //Skript.registerExpression(ExprWolvMCKills.class, Integer.class, ExpressionType.PROPERTY, "werewolf kills of %player%");//TODO enlever
 		   }
 		   if (Bukkit.getServer().getPluginManager().getPlugin("ASkyBlock") != null) {
 			   Skript.registerExpression(ExprASkyBlockHomeLocation.class, Location.class, ExpressionType.PROPERTY, "(asb|askyblock) home[ location] of %player%", "(asb|askyblock) %player%['s] home[ location]");
@@ -332,8 +350,8 @@ public class WolvSK extends JavaPlugin implements Listener {
 				   }
 			   }, 0);
 			   Skript.registerCondition(CondEssentialsAFK.class, "%player% is afk");
-			   Skript.registerCondition(CondEssentialsAFK.class, "%player% is[ in] god[ mode]");
-			   Skript.registerCondition(CondEssentialsAFK.class, "%player% is vanish[ed]"); //Ajouter support SuperVanish
+			   Skript.registerCondition(CondEssentialsGodMode.class, "%player% is[ in] god[ mode]");
+			   Skript.registerCondition(CondEssentialsVanish.class, "%player% is vanish[ed]"); //Ajouter support SuperVanish
 			   Skript.registerExpression(ExprEssentialsHomes.class, String.class, ExpressionType.PROPERTY, "homes of %player%", "%player%['s] homes");
 			   Skript.registerExpression(ExprEssentialsHome.class, Location.class, ExpressionType.PROPERTY, "home %string% of %player%", "%player%['s] home %string%");
 			   Skript.registerExpression(ExprEssentialsHome.class, Location.class, ExpressionType.PROPERTY, "home of %player%", "%player%['s] home");
@@ -349,7 +367,7 @@ public class WolvSK extends JavaPlugin implements Listener {
 			   Skript.registerExpression(ExprSuperTrailsType.class, String.class, ExpressionType.PROPERTY, "wing[s] type of %player%", "%player%['s] wing[s] type");
 		   }
 		   if (Bukkit.getServer().getPluginManager().getPlugin("pvparena") != null) {
-			   Classes.registerClass(new ClassInfo<Arena>(Arena.class, "arena").user("arena").name("pvparena").parser(new Parser<Arena>() {
+			   Classes.registerClass(new ClassInfo<Arena>(Arena.class, "pvparena").user("pvparena").name("pvparena").parser(new Parser<Arena>() {
 
 				@Override
 				public String getVariableNamePattern() {
@@ -373,7 +391,7 @@ public class WolvSK extends JavaPlugin implements Listener {
 				}
 			   
 			   }));
-			   Skript.registerEvent("pvparena death event", SimpleEvent.class, PADeathEvent.class, "(pa|pvparena|arena) death");
+			   Skript.registerEvent("pvparena death event", SimpleEvent.class, PADeathEvent.class, "(pa|pvparena) death");
 			   EventValues.registerEventValue(PADeathEvent.class, Player.class, new Getter<Player, PADeathEvent>() {
 				   public Player get(PADeathEvent e) {
 					   return e.getPlayer();
@@ -384,13 +402,13 @@ public class WolvSK extends JavaPlugin implements Listener {
 					   return e.getArena();
 				   }
 			   }, 0);
-			   Skript.registerEvent("pvparena end event", SimpleEvent.class, PAEndEvent.class, "(pa|pvparena|arena) end");
+			   Skript.registerEvent("pvparena end event", SimpleEvent.class, PAEndEvent.class, "(pa|pvparena) end");
 			   EventValues.registerEventValue(PAEndEvent.class, Arena.class, new Getter<Arena, PAEndEvent>() {
 				   public Arena get(PAEndEvent e) {
 					   return e.getArena();
 				   }
 			   }, 0);
-			   Skript.registerEvent("pvparena exit event", SimpleEvent.class, PAExitEvent.class, "(pa|pvparena|arena) exit");
+			   Skript.registerEvent("pvparena exit event", SimpleEvent.class, PAExitEvent.class, "(pa|pvparena) exit");
 			   EventValues.registerEventValue(PAExitEvent.class, Player.class, new Getter<Player, PAExitEvent>() {
 				   public Player get(PAExitEvent e) {
 					   return e.getPlayer();
@@ -401,7 +419,7 @@ public class WolvSK extends JavaPlugin implements Listener {
 					   return e.getArena();
 				   }
 			   }, 0);
-			   Skript.registerEvent("pvparena join event", SimpleEvent.class, PAJoinEvent.class, "(pa|pvparena|arena) join");
+			   Skript.registerEvent("pvparena join event", SimpleEvent.class, PAJoinEvent.class, "(pa|pvparena) join");
 			   EventValues.registerEventValue(PAJoinEvent.class, Player.class, new Getter<Player, PAJoinEvent>() {
 				   public Player get(PAJoinEvent e) {
 					   return e.getPlayer();
@@ -412,7 +430,7 @@ public class WolvSK extends JavaPlugin implements Listener {
 					   return e.getArena();
 				   }
 			   }, 0);
-			   Skript.registerEvent("pvparena kill event", SimpleEvent.class, PAKillEvent.class, "(pa|pvparena|arena) kill");
+			   Skript.registerEvent("pvparena kill event", SimpleEvent.class, PAKillEvent.class, "(pa|pvparena) kill");
 			   EventValues.registerEventValue(PAKillEvent.class, Player.class, new Getter<Player, PAKillEvent>() {
 				   public Player get(PAKillEvent e) {
 					   return e.getPlayer();
@@ -423,7 +441,7 @@ public class WolvSK extends JavaPlugin implements Listener {
 					   return e.getArena();
 				   }
 			   }, 0);
-			   Skript.registerEvent("pvparena leave event", SimpleEvent.class, PALeaveEvent.class, "(pa|pvparena|arena) leave");
+			   Skript.registerEvent("pvparena leave event", SimpleEvent.class, PALeaveEvent.class, "(pa|pvparena) leave");
 			   EventValues.registerEventValue(PALeaveEvent.class, Player.class, new Getter<Player, PALeaveEvent>() {
 				   public Player get(PALeaveEvent e) {
 					   return e.getPlayer();
@@ -434,7 +452,7 @@ public class WolvSK extends JavaPlugin implements Listener {
 					   return e.getArena();
 				   }
 			   }, 0);
-			   Skript.registerEvent("pvparena lose event", SimpleEvent.class, PALoseEvent.class, "(pa|pvparena|arena) lose");
+			   Skript.registerEvent("pvparena lose event", SimpleEvent.class, PALoseEvent.class, "(pa|pvparena) lose");
 			   EventValues.registerEventValue(PALoseEvent.class, Player.class, new Getter<Player, PALoseEvent>() {
 				   public Player get(PALoseEvent e) {
 					   return e.getPlayer();
@@ -445,7 +463,7 @@ public class WolvSK extends JavaPlugin implements Listener {
 					   return e.getArena();
 				   }
 			   }, 0);
-			   Skript.registerEvent("pvparena player class change event", SimpleEvent.class, PAPlayerClassChangeEvent.class, "(pa|pvparena|arena)[ player] class change");
+			   Skript.registerEvent("pvparena player class change event", SimpleEvent.class, PAPlayerClassChangeEvent.class, "(pa|pvparena)[ player] class change");
 			   EventValues.registerEventValue(PAPlayerClassChangeEvent.class, Player.class, new Getter<Player, PAPlayerClassChangeEvent>() {
 				   public Player get(PAPlayerClassChangeEvent e) {
 					   return e.getPlayer();
@@ -461,13 +479,13 @@ public class WolvSK extends JavaPlugin implements Listener {
 					   return e.getArenaClass().getName();
 				   }
 			   }, 0);
-			   Skript.registerEvent("pvparena start event", SimpleEvent.class, PAStartEvent.class, "(pa|pvparena|arena) start");
+			   Skript.registerEvent("pvparena start event", SimpleEvent.class, PAStartEvent.class, "(pa|pvparena) start");
 			   EventValues.registerEventValue(PAStartEvent.class, Arena.class, new Getter<Arena, PAStartEvent>() {
 				   public Arena get(PAStartEvent e) {
 					   return e.getArena();
 				   }
 			   }, 0);
-			   Skript.registerEvent("pvparena team change event", SimpleEvent.class, PATeamChangeEvent.class, "(pa|pvparena|arena)[ player] team change");
+			   Skript.registerEvent("pvparena team change event", SimpleEvent.class, PATeamChangeEvent.class, "(pa|pvparena)[ player] team change");
 			   EventValues.registerEventValue(PATeamChangeEvent.class, Player.class, new Getter<Player, PATeamChangeEvent>() {
 				   public Player get(PATeamChangeEvent e) {
 					   return e.getPlayer();
@@ -483,7 +501,7 @@ public class WolvSK extends JavaPlugin implements Listener {
 					   return e.getTo().getName();
 				   }
 			   }, 0);
-			   Skript.registerEvent("pvparena win event", SimpleEvent.class, PAWinEvent.class, "(pa|pvparena|arena) win");
+			   Skript.registerEvent("pvparena win event", SimpleEvent.class, PAWinEvent.class, "(pa|pvparena) win");
 			   EventValues.registerEventValue(PAWinEvent.class, Player.class, new Getter<Player, PAWinEvent>() {
 				   public Player get(PAWinEvent e) {
 					   return e.getPlayer();
@@ -494,9 +512,9 @@ public class WolvSK extends JavaPlugin implements Listener {
 					   return e.getArena();
 				   }
 			   }, 0);
-			   Skript.registerExpression(ExprPVPArenaArena.class, Arena.class, ExpressionType.PROPERTY, "([pvp[ ]]arena|pa) %string%");
-			   Skript.registerExpression(ExprPVPArenaPlayerArena.class, Arena.class, ExpressionType.PROPERTY, "([pvp[ ]]arena|pa) of %player%", "%player%['s] ([pvp[ ]]arena|pa)");
-			   Skript.registerEffect(EffPVPArenaRemoveArena.class, "remove ([pvp[ ]]arena|pa) %arena%");
+			   Skript.registerExpression(ExprPVPArenaArena.class, Arena.class, ExpressionType.PROPERTY, "(pvp[ ]arena|pa) %string%");
+			   Skript.registerExpression(ExprPVPArenaPlayerArena.class, Arena.class, ExpressionType.PROPERTY, "(pvp[ ]arena|pa) of %player%", "%player%['s] (pvp[ ]arena|pa)");
+			   Skript.registerEffect(EffPVPArenaRemoveArena.class, "remove (pvp[ ]arena|pa) %arena%");
 		   }
 		   if (Bukkit.getServer().getPluginManager().getPlugin("GuardianBeamAPI") != null && Bukkit.getServer().getPluginManager().getPlugin("ProtocolLib") != null) {
 			   Skript.registerExpression(ExprStartPositionBeam.class, Location.class, ExpressionType.PROPERTY, "start[ing] location of[ guardian] beam[ with id] %string%");
@@ -504,10 +522,27 @@ public class WolvSK extends JavaPlugin implements Listener {
 			   Skript.registerEffect(EffCreateBeam.class, "create[ guardian] beam (from|between) %location% (to|and) %location% (with id|named) %string%", "create[ guardian] beam (with id|named) %string% (from|between) %location% (to|and) %location%");
 			   Skript.registerEffect(EffStopBeam.class, "stop[ guardian] beam (with id|named) %string%");
 		   }
+		   Minigames.load();
 		   Bukkit.getLogger().info(ChatColor.translateAlternateColorCodes('&', "&aWolvSK Enabled!"));
 	  }
+
 	  
 	  public static WolvSK getInstance() {
 		    return WolvSK.instance;
+	  }
+	  
+	  @Override
+	  public void onPluginMessageReceived(String channel, Player player, byte[] message) {
+	    if (!channel.equals("BungeeCord")) {
+	      return;
+	    }
+	    ByteArrayDataInput in = ByteStreams.newDataInput(message);
+	    String sub = in.readUTF();
+    	String server = in.readUTF();
+	    int playercount = in.readInt();
+    	System.out.println("Sub: " + sub);
+	    if(sub.equalsIgnoreCase("PlayerCount")) {
+	    	System.out.println(playercount + " joueurs sur " + server);
+	    }
 	  }
 }

@@ -33,13 +33,21 @@ public class Minigame {
 		return list;
 	}
 	
-	public boolean addArena(Arena arena) {
+	public boolean addArena(Arena arena, boolean save) {
 		if(arenas.contains(arena)) {
 			return false;
 		}
+		for(Arena a : this.getArenas()) {
+			if(a.getName().equals(arena.getName())) {
+				return false;
+			}
+		}
 		if(arena.getMinigame()==this) {
 			arenas.add(arena);
-			Minigames.save(arena.getMinigame());
+			if(save) {
+				Minigames.save(arena.getMinigame());
+			}
+			arena.updateSigns();
 			return true;
 		}
 		else {
@@ -56,10 +64,19 @@ public class Minigame {
 		}
 	}
 	
-	public Arena getArena(String name) {
-		for(Arena a : arenas) {
-			if(a.getName().equals(name)) {
-				return a;
+	public Arena getArena(String name, boolean ignoreCase) {
+		if(ignoreCase) {
+			for(Arena a : arenas) {
+				if(a.getName().equalsIgnoreCase(name)) {
+					return a;
+				}
+			}
+		}
+		else {
+			for(Arena a : arenas) {
+				if(a.getName().equals(name)) {
+					return a;
+				}
 			}
 		}
 		return null;

@@ -6,18 +6,28 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.annotation.Nullable;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
@@ -27,20 +37,31 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitScheduler;
 
+import ch.njol.skript.Skript;
+import ch.njol.skript.classes.ClassInfo;
+import ch.njol.skript.classes.Parser;
+import ch.njol.skript.lang.ExpressionType;
+import ch.njol.skript.lang.ParseContext;
+import ch.njol.skript.lang.util.SimpleEvent;
+import ch.njol.skript.registrations.Classes;
+import ch.njol.skript.registrations.EventValues;
+import ch.njol.skript.util.Getter;
 import fr.nashoba24.wolvsk.WolvSK;
 
-public class Minigames implements Listener {
+public class Minigames implements Listener, CommandExecutor {
 	
 	static ArrayList<Minigame> arr = new ArrayList<Minigame>();
 	static HashMap<String, Minigame> map = new HashMap<String, Minigame>();
 	static HashMap<Player, Minigame> games = new HashMap<Player, Minigame>();
 	static HashMap<String, Minigame> commands = new HashMap<String, Minigame>();
 	static HashMap<String, Integer> lvl = new HashMap<String, Integer>();
+	static HashMap<String, Float> exp = new HashMap<String, Float>();
 	static HashMap<String, ItemStack[]> inv = new HashMap<String, ItemStack[]>();
 	static HashMap<String, Location> ancLoc = new HashMap<String, Location>();
 	static boolean init = false;
@@ -63,6 +84,32 @@ public class Minigames implements Listener {
 			Minigames.save(mg);
 		}
 		return mg;
+	}
+	
+	public static void removeMinigame(String name, boolean save) {
+		name = name.replaceAll(" ", "-");
+		if(!map.containsKey(name)) {
+			return;
+		}
+		Minigame mg = Minigames.getByName(name);
+		for(Arena a : mg.getArenas()) {
+			Minigames.stop(mg, a);
+		}
+		arr.remove(name);
+		commands.remove(mg.getCommand());
+		if(save) {
+			createFolder();
+			File file = new File(WolvSK.getInstance().getDataFolder() + "/minigames.yml");
+			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+			if(config.isSet(mg.getName())) {
+				config.set(mg.getName(), null);
+			}
+			try {
+				config.save(file);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public static Minigame getByName(String name) {
@@ -88,7 +135,12 @@ public class Minigames implements Listener {
 			if(arena.playersCount()>=arena.getMin()) {
 				if(arena.getMinigame()==mg) {
 					arena.setStarted(true);
+					for(Player p : arena.getAllPlayers()) {
+						p.setLevel(0);
+						p.setExp(0F);
+					}
 					WolvSK.getInstance().getServer().getPluginManager().callEvent(new ArenaStartEvent(mg, arena));
+					arena.updateSigns();
 					return true;
 				}
 				else {
@@ -103,6 +155,7 @@ public class Minigames implements Listener {
 			if(arena.getMinigame()==mg) {
 				arena.setStarted(true);
 				WolvSK.getInstance().getServer().getPluginManager().callEvent(new ArenaStartEvent(mg, arena));
+				arena.updateSigns();
 				return true;
 			}
 			else {
@@ -119,6 +172,7 @@ public class Minigames implements Listener {
 				Minigames.leave(p, true, false, null);
 			}
 			WolvSK.getInstance().getServer().getPluginManager().callEvent(new ArenaStopEvent(mg, arena));
+			arena.updateSigns();
 			return true;
 		}
 		else {
@@ -174,6 +228,7 @@ public class Minigames implements Listener {
 				arena.addPlayer(p);
 				games.put(p, mg);
 				lvl.put(p.getName(), p.getLevel());
+				exp.put(p.getName(), p.getExp());
 				inv.put(p.getName(), p.getInventory().getContents());
 				ancLoc.put(p.getName(), p.getLocation());
 				p.getInventory().clear();
@@ -185,6 +240,7 @@ public class Minigames implements Listener {
 					p.teleport(loc);
 				}
 				WolvSK.getInstance().getServer().getPluginManager().callEvent(new PlayerJoinArenaEvent(mg, arena, p));
+				arena.updateSigns();
 				return true;
 			}
 		}
@@ -206,12 +262,16 @@ public class Minigames implements Listener {
 					return false;
 				}
 				else {
+					Arena arena = Minigames.getMinigame(p).getArena(p);
 					WolvSK.getInstance().getServer().getPluginManager().callEvent(new PlayerLeaveArenaEvent(Minigames.getMinigame(p), Minigames.getMinigame(p).getArena(p), p));
 					Minigames.getMinigame(p).getArena(p).removePlayer(p);
 					Minigames.getMinigame(p).setArena(p, null);
 					games.remove(p);
 					if(lvl.containsKey(p.getName())) {
 						p.setLevel(lvl.get(p.getName()));
+					}
+					if(exp.containsKey(p.getName())) {
+						p.setExp(exp.get(p.getName()));
 					}
 					if(inv.containsKey(p.getName())) {
 						p.getInventory().setContents(inv.get(p.getName()));
@@ -220,18 +280,23 @@ public class Minigames implements Listener {
 					if(ancLoc.containsKey(p.getName())) {
 						p.teleport(ancLoc.get(p.getName()));
 					}
+					arena.updateSigns();
 					return true;
 				}
 			}
 		}
 		else {
 			if(Minigames.inGame(p)) {
+				Arena arena = Minigames.getMinigame(p).getArena(p);
 				WolvSK.getInstance().getServer().getPluginManager().callEvent(new PlayerLeaveArenaEvent(Minigames.getMinigame(p), Minigames.getMinigame(p).getArena(p), p));
 				Minigames.getMinigame(p).getArena(p).removePlayer(p);
 				Minigames.getMinigame(p).setArena(p, null);
 				games.remove(p);
 				if(lvl.containsKey(p.getName())) {
 					p.setLevel(lvl.get(p.getName()));
+				}
+				if(exp.containsKey(p.getName())) {
+					p.setExp(exp.get(p.getName()));
 				}
 				if(inv.containsKey(p.getName())) {
 					p.getInventory().setContents(inv.get(p.getName()));
@@ -240,6 +305,7 @@ public class Minigames implements Listener {
 				if(ancLoc.containsKey(p.getName())) {
 					p.teleport(ancLoc.get(p.getName()));
 				}
+				arena.updateSigns();
 				return true;
 			}
 			else {
@@ -277,6 +343,9 @@ public class Minigames implements Listener {
 					for(Arena a : list2) {
 						if(!a.isStarted()) {
 							a.timer();
+						}
+						else {
+							a.finish();
 						}
 					}
 				}
@@ -334,7 +403,7 @@ public class Minigames implements Listener {
 					if(a==null) {
 						return;
 					}
-					a.removeSign(e.getBlock());
+					a.removeSign(e.getBlock(), true);
 				}
 				else {
 					e.setCancelled(true);
@@ -373,7 +442,7 @@ public class Minigames implements Listener {
 						if(e.getLine(1).equalsIgnoreCase(a.getName())) {
 							e.setLine(0, ChatColor.GREEN + "[" + mg.getPrefix() + "]");
 							e.setLine(1, a.getName());
-							a.addSign(e.getBlock());
+							a.addSign(e.getBlock(), true);
 							return;
 						}
 					}
@@ -422,18 +491,41 @@ public class Minigames implements Listener {
 	}
 	
 	@EventHandler
+	public void onInteract(PlayerInteractEvent e) {
+		if(e.getAction()==Action.RIGHT_CLICK_BLOCK) {
+			if(e.getClickedBlock().getState() instanceof Sign) {
+				Sign sign = (Sign) e.getClickedBlock().getState();
+				for(Minigame mg : Minigames.getAllMinigames()) {
+					if(sign.getLine(0).equals(ChatColor.GREEN + "[" + mg.getPrefix() + "]")) {
+						if(mg.getArena(sign.getLine(1), false)!=null && sign.getLine(3).equals(ChatColor.GREEN + "join")) {
+							if(mg.getArena(sign.getLine(1), false).getLobby()==null) {
+								e.getPlayer().sendMessage(ChatColor.RED + "[" + mg.getPrefix() + "] The arena " + ChatColor.DARK_RED + sign.getLine(1) + ChatColor.RED + " is not ready to be used!");
+								return;
+							}
+							boolean success = join(e.getPlayer(), mg, mg.getArena(sign.getLine(1), false), true);
+							if(success) {
+								mg.getArena(sign.getLine(1), false).broadcast(ChatColor.GOLD + " " + e.getPlayer().getName() + ChatColor.AQUA + " joined the game!");
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	@EventHandler
 	public void onCommand(PlayerCommandPreprocessEvent e) {
 		String[] list = e.getMessage().split(" ");
 		final Player p = e.getPlayer();
 		if(commands.containsKey(list[0].replaceFirst("/", "").toLowerCase())) {
 			e.setCancelled(true);
-			String cmd = list[0].replaceFirst("/", "").toLowerCase();
+			String cmd = list[0].replaceFirst("/", "");
 			String[] args = new String[list.length - 1];
 			Integer i = 0;
 			boolean first = true;
 			for(String s : list) {
 				if(!first) {
-					args[i] = s.toLowerCase();
+					args[i] = s;
 					++i;
 				}
 				else {
@@ -470,22 +562,32 @@ public class Minigames implements Listener {
 				if(p.hasPermission("wolvsk." + mg.getName() + ".settimer") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
 					p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " settimer <arena> <seconds>");
 				}
+				if(p.hasPermission("wolvsk." + mg.getName() + ".start") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
+					p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " start <arena>");
+				}
+				if(p.hasPermission("wolvsk." + mg.getName() + ".stop") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
+					p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " stop <arena>");
+				}
+				p.sendMessage(ChatColor.AQUA + "---------------");
 			}
 			else if(args.length==1) {
-				if(args[0].equals("leave")) {
+				if(args[0].equalsIgnoreCase("leave")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".leave") || p.hasPermission("wolvsk." + mg.getName() + ".player")) {
-						Arena a = Minigames.getMinigame(p).getArena(p);
+						Arena a = null;
+						if(Minigames.getMinigame(p)!=null) {
+							a = Minigames.getMinigame(p).getArena(p);
+						}
 						boolean s = Minigames.leave(p, false, true, mg.getPrefix());
 						if(s) {
 							p.sendMessage(ChatColor.GREEN + "[" + mg.getPrefix() + "] You left the game!");
-							a.broadcast(mg.getFullPrefix() + " " + ChatColor.GOLD + p.getName() + ChatColor.AQUA + " left the game!");
+							a.broadcast(ChatColor.GOLD + p.getName() + ChatColor.AQUA + " left the game!");
 						}
 					}
 					else {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				if(args[0].equals("join")) {
+				else if(args[0].equalsIgnoreCase("join")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".join") || p.hasPermission("wolvsk." + mg.getName() + ".player")) {
 						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " join <arena>");
 					}
@@ -493,7 +595,7 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else if(args[0].equals("create")) {
+				else if(args[0].equalsIgnoreCase("create")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".create") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
 						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " create <arena> <min> <max>");
 					}
@@ -501,7 +603,7 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else if(args[0].equals("setlobby")) {
+				else if(args[0].equalsIgnoreCase("setlobby")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".setlobby") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
 						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " setlobby <arena>");
 					}
@@ -509,7 +611,7 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else if(args[0].equals("setmin")) {
+				else if(args[0].equalsIgnoreCase("setmin")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".setmin") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
 						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " setmin <arena> <min>");
 					}
@@ -517,7 +619,7 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else if(args[0].equals("setmax")) {
+				else if(args[0].equalsIgnoreCase("setmax")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".setmax") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
 						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " setmax <arena> <min>");
 					}
@@ -525,7 +627,7 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else if(args[0].equals("settimer")) {
+				else if(args[0].equalsIgnoreCase("settimer")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".settimer") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
 						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " settimer <arena> <seconds>");
 					}
@@ -533,7 +635,7 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else if(args[0].equals("list")) {
+				else if(args[0].equalsIgnoreCase("list")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".list") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
 						Arena[] l = mg.getArenas();
 						ArrayList<String> f = new ArrayList<String>();
@@ -546,7 +648,7 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else if(args[0].equals("remove")) {
+				else if(args[0].equalsIgnoreCase("remove")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".remove") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
 						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " remove <arena>");
 					}
@@ -554,28 +656,98 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else if(args[0].equals("help")) {
-					WolvSK.getInstance().getServer().dispatchCommand(p, cmd);
+				else if(args[0].equalsIgnoreCase("start")) {
+					if(p.hasPermission("wolvsk." + mg.getName() + ".start") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
+						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " start <arena>");
+					}
+					else {
+						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
+					}
+				}
+				else if(args[0].equalsIgnoreCase("stop")) {
+					if(p.hasPermission("wolvsk." + mg.getName() + ".start") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
+						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " start <arena>");
+					}
+					else {
+						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
+					}
+				}
+				else if(args[0].equalsIgnoreCase("help")) {
+					p.sendMessage(ChatColor.AQUA + "----- " + mg.getFullPrefix() + ChatColor.RESET + ChatColor.AQUA + " -----");
+					if(p.hasPermission("wolvsk." + mg.getName() + ".join") || p.hasPermission("wolvsk." + mg.getName() + ".player")) {
+						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " join <arena>");
+					}
+					if(p.hasPermission("wolvsk." + mg.getName() + ".leave") || p.hasPermission("wolvsk." + mg.getName() + ".player")) {
+						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " leave");
+					}
+					if(p.hasPermission("wolvsk." + mg.getName() + ".create") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
+						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " create <arena> <min> <max>");
+					}
+					if(p.hasPermission("wolvsk." + mg.getName() + ".setlobby") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
+						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " setlobby <arena>");
+					}
+					if(p.hasPermission("wolvsk." + mg.getName() + ".setmin") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
+						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " setmin <arena> <min>");
+					}
+					if(p.hasPermission("wolvsk." + mg.getName() + ".setmax") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
+						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " setmax <arena> <min>");
+					}
+					if(p.hasPermission("wolvsk." + mg.getName() + ".list") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
+						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " list");
+					}
+					if(p.hasPermission("wolvsk." + mg.getName() + ".remove") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
+						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " remove <arena>");
+					}
+					if(p.hasPermission("wolvsk." + mg.getName() + ".settimer") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
+						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " settimer <arena> <seconds>");
+					}
 				}
 				else {
-					WolvSK.getInstance().getServer().dispatchCommand(p, cmd);
+					p.sendMessage(ChatColor.AQUA + "----- " + mg.getFullPrefix() + ChatColor.RESET + ChatColor.AQUA + " -----");
+					if(p.hasPermission("wolvsk." + mg.getName() + ".join") || p.hasPermission("wolvsk." + mg.getName() + ".player")) {
+						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " join <arena>");
+					}
+					if(p.hasPermission("wolvsk." + mg.getName() + ".leave") || p.hasPermission("wolvsk." + mg.getName() + ".player")) {
+						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " leave");
+					}
+					if(p.hasPermission("wolvsk." + mg.getName() + ".create") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
+						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " create <arena> <min> <max>");
+					}
+					if(p.hasPermission("wolvsk." + mg.getName() + ".setlobby") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
+						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " setlobby <arena>");
+					}
+					if(p.hasPermission("wolvsk." + mg.getName() + ".setmin") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
+						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " setmin <arena> <min>");
+					}
+					if(p.hasPermission("wolvsk." + mg.getName() + ".setmax") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
+						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " setmax <arena> <min>");
+					}
+					if(p.hasPermission("wolvsk." + mg.getName() + ".list") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
+						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " list");
+					}
+					if(p.hasPermission("wolvsk." + mg.getName() + ".remove") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
+						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " remove <arena>");
+					}
+					if(p.hasPermission("wolvsk." + mg.getName() + ".settimer") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
+						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " settimer <arena> <seconds>");
+					}
 				}
 			}
 			else if(args.length==2) {
-				if(args[0].equals("join")) {
+				if(args[0].equalsIgnoreCase("join")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".join") || p.hasPermission("wolvsk." + mg.getName() + ".player")) {
 						if(!Minigames.inGame(p)) {
-							if(mg.getArena(args[1])==null) {
+							if(mg.getArena(args[1], true)==null) {
 								p.sendMessage(ChatColor.RED + "[" + mg.getPrefix() + "] The arena " + args[1] + " doesn't exists!");
 								return;
 							}
-							if((mg.getArena(args[1]).getLobby()==null)) {
+							if((mg.getArena(args[1], true).getLobby()==null)) {
 								p.sendMessage(ChatColor.RED + "[" + mg.getPrefix() + "] The arena " + ChatColor.DARK_RED + args[1] + ChatColor.RED + " is not ready to be used!");
 								return;
 							}
-							boolean success = Minigames.join(p, mg, mg.getArena(args[1]), true);
+							boolean success = Minigames.join(p, mg, mg.getArena(args[1], true), true);
 							if(success) {
-								mg.getArena(args[1]).broadcast(mg.getFullPrefix() + ChatColor.GOLD + " " + p.getName() + ChatColor.AQUA + " joined the game!");
+								mg.getArena(args[1], true).broadcast(p.getName() + ChatColor.AQUA + " joined the game!");
 							}
 						}
 					}
@@ -583,7 +755,7 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else if(args[0].equals("create")) {
+				else if(args[0].equalsIgnoreCase("create")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".create") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
 						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " create <arena> <min> <max>");
 					}
@@ -591,10 +763,10 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else if(args[0].equals("remove")) {
+				else if(args[0].equalsIgnoreCase("remove")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".remove") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
-						if(mg.getArena(args[1])!=null) {
-							mg.removeArena(mg.getArena(args[1]), true);
+						if(mg.getArena(args[1], true)!=null) {
+							mg.removeArena(mg.getArena(args[1], true), true);
 							p.sendMessage(ChatColor.GREEN + "[" + mg.getPrefix() + "] The arena " + ChatColor.DARK_GREEN + args[1] + ChatColor.GREEN + " has been removed!");
 						}
 						else {
@@ -605,10 +777,10 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else if(args[0].equals("setlobby")) {
+				else if(args[0].equalsIgnoreCase("setlobby")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".setlobby") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
-						if(mg.getArena(args[1])!=null) {
-							mg.getArena(args[1]).setLobby(p.getLocation(), true);
+						if(mg.getArena(args[1], true)!=null) {
+							mg.getArena(args[1], true).setLobby(p.getLocation(), true);
 							p.sendMessage(ChatColor.GREEN + "[" + mg.getPrefix() + "] The lobby of the arena " + ChatColor.DARK_GREEN + args[1] + ChatColor.GREEN + " has been set to your location!");
 						}
 						else {
@@ -619,7 +791,7 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else if(args[0].equals("setmin")) {
+				else if(args[0].equalsIgnoreCase("setmin")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".setmin") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
 						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " setmin <arena> <min>");
 					}
@@ -627,7 +799,7 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else if(args[0].equals("setmax")) {
+				else if(args[0].equalsIgnoreCase("setmax")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".setmax") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
 						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " setmax <arena> <min>");
 					}
@@ -635,7 +807,7 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else if(args[0].equals("settimer")) {
+				else if(args[0].equalsIgnoreCase("settimer")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".settimer") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
 						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " settimer <arena> <seconds>");
 					}
@@ -643,12 +815,37 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else {
-					WolvSK.getInstance().getServer().dispatchCommand(p, cmd);
+				else if(args[0].equalsIgnoreCase("start")) {
+					if(p.hasPermission("wolvsk." + mg.getName() + ".start") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
+						if(mg.getArena(args[1], true)!=null) {
+							Minigames.start(mg, mg.getArena(args[1], true), true);
+							p.sendMessage(ChatColor.GREEN + "[" + mg.getPrefix() + "] You forced the starting of the arena " + ChatColor.DARK_GREEN + args[1] + ChatColor.GREEN + "!");
+						}
+						else {
+							p.sendMessage(ChatColor.RED + "[" + mg.getPrefix() + "] The arena " + args[1] + " doesn't exists!");
+						}
+					}
+					else {
+						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
+					}
+				}
+				else if(args[0].equalsIgnoreCase("stop")) {
+					if(p.hasPermission("wolvsk." + mg.getName() + ".stop") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
+						if(mg.getArena(args[1], true)!=null) {
+							Minigames.stop(mg, mg.getArena(args[1], true));
+							p.sendMessage(ChatColor.GREEN + "[" + mg.getPrefix() + "] You stopped the arena " + ChatColor.DARK_GREEN + args[1] + ChatColor.GREEN + "!");
+						}
+						else {
+							p.sendMessage(ChatColor.RED + "[" + mg.getPrefix() + "] The arena " + args[1] + " doesn't exists!");
+						}
+					}
+					else {
+						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
+					}
 				}
 			}
 			else if(args.length==3) {
-				if(args[0].equals("join")) {
+				if(args[0].equalsIgnoreCase("join")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".join") || p.hasPermission("wolvsk." + mg.getName() + ".player")) {
 						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " join <arena>");
 					}
@@ -656,7 +853,7 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else if(args[0].equals("create")) {
+				else if(args[0].equalsIgnoreCase("create")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".create") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
 						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " create <arena> <min> <max>");
 					}
@@ -664,7 +861,7 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else if(args[0].equals("setlobby")) {
+				else if(args[0].equalsIgnoreCase("setlobby")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".setlobby") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
 						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " setlobby <arena>");
 					}
@@ -672,13 +869,13 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else if(args[0].equals("setmin")) {
+				else if(args[0].equalsIgnoreCase("setmin")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".setmin") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
-						if(mg.getArena(args[1])!=null) {
+						if(mg.getArena(args[1], true)!=null) {
 							if(isInteger(args[2])) {
 								Integer min = Integer.parseInt(args[2]);
-								if(mg.getArena(args[1]).getMax()>=min) {
-									mg.getArena(args[1]).setMin(min, true);
+								if(mg.getArena(args[1], true).getMax()>=min) {
+									mg.getArena(args[1], true).setMin(min, true);
 									p.sendMessage(ChatColor.GREEN + "[" + mg.getPrefix() + "] The minimum of player of the arena " + ChatColor.DARK_GREEN + args[1] + ChatColor.GREEN + " is now " +  ChatColor.DARK_GREEN + min + ChatColor.GREEN + "!");
 								}
 								else {
@@ -697,13 +894,13 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else if(args[0].equals("setmax")) {
+				else if(args[0].equalsIgnoreCase("setmax")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".setmax") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
-						if(mg.getArena(args[1])!=null) {
+						if(mg.getArena(args[1], true)!=null) {
 							if(isInteger(args[2])) {
 								Integer max = Integer.parseInt(args[2]);
-								if(max>=mg.getArena(args[1]).getMin()) {
-									mg.getArena(args[1]).setMax(max, true);
+								if(max>=mg.getArena(args[1], true).getMin()) {
+									mg.getArena(args[1], true).setMax(max, true);
 									p.sendMessage(ChatColor.GREEN + "[" + mg.getPrefix() + "] The maximum of player of the arena " + ChatColor.DARK_GREEN + args[1] + ChatColor.GREEN + " is now " +  ChatColor.DARK_GREEN + max + ChatColor.GREEN + "!");
 								}
 								else {
@@ -722,13 +919,13 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else if(args[0].equals("settimer")) {
+				else if(args[0].equalsIgnoreCase("settimer")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".settimer") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
-						if(mg.getArena(args[1])!=null) {
+						if(mg.getArena(args[1], true)!=null) {
 							if(isInteger(args[2])) {
 								Integer timer = Integer.parseInt(args[2]);
 								if(timer>0) {
-									mg.getArena(args[1]).setDefaultTimer(timer, true);
+									mg.getArena(args[1], true).setDefaultTimer(timer, true);
 									p.sendMessage(ChatColor.GREEN + "[" + mg.getPrefix() + "] The timer of the arena " + ChatColor.DARK_GREEN + args[1] + ChatColor.GREEN + " is now " +  ChatColor.DARK_GREEN + timer + ChatColor.GREEN + "!");
 								}
 								else {
@@ -747,12 +944,9 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else {
-					WolvSK.getInstance().getServer().dispatchCommand(p, cmd);
-				}
 			}
 			else if(args.length==4) {
-				if(args[0].equals("join")) {
+				if(args[0].equalsIgnoreCase("join")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".join") || p.hasPermission("wolvsk." + mg.getName() + ".player")) {
 						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " join <arena>");
 					}
@@ -760,7 +954,7 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else if(args[0].equals("setlobby")) {
+				else if(args[0].equalsIgnoreCase("setlobby")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".setlobby") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
 						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " setlobby <arena>");
 					}
@@ -768,10 +962,10 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else if(args[0].equals("create")) {
+				else if(args[0].equalsIgnoreCase("create")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".create") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
-						if(mg.getArena(args[1])==null) {
-							if(args[1].equals("command") || args[1].equals("prefix") || args[1].equals("name")) {
+						if(mg.getArena(args[1], true)==null) {
+							if(args[1].equalsIgnoreCase("command") || args[1].equalsIgnoreCase("prefix") || args[1].equalsIgnoreCase("name")) {
 								p.sendMessage(ChatColor.RED + "[" + mg.getPrefix() + "] An arena cannot be called with that name!");
 							}
 							if(isInteger(args[2])) {
@@ -782,7 +976,7 @@ public class Minigames implements Listener {
 										p.sendMessage(ChatColor.RED + "[" + mg.getPrefix() + "] The minimum of player cannot be greater than the maximum of player");
 										return;
 									}
-									mg.addArena(new Arena(mg, args[1], min, max));
+									mg.addArena(new Arena(mg, args[1], min, max), true);
 									p.sendMessage(ChatColor.GREEN + "[" + mg.getPrefix() + "] The arena " + ChatColor.DARK_GREEN + args[1] + ChatColor.GREEN + " has been created!");
 								}
 								else {
@@ -801,12 +995,9 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else {
-					WolvSK.getInstance().getServer().dispatchCommand(p, cmd);
-				}
 			}
 			else {
-				if(args[0].equals("join")) {
+				if(args[0].equalsIgnoreCase("join")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".join") || p.hasPermission("wolvsk." + mg.getName() + ".player")) {
 						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " join <arena>");
 					}
@@ -814,16 +1005,13 @@ public class Minigames implements Listener {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
 				}
-				else if(args[0].equals("create")) {
+				else if(args[0].equalsIgnoreCase("create")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".create") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
 						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " create <arena> <min> <max>");
 					}
 					else {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 					}
-				}
-				else {
-					WolvSK.getInstance().getServer().dispatchCommand(p, cmd);
 				}
 			}
 			return;
@@ -875,6 +1063,14 @@ public class Minigames implements Listener {
 				section2.set("lobby.z", a.getLobby().getBlockZ());
 				section2.set("lobby.world", a.getLobby().getWorld().getName());
 			}
+			Integer block = 0;
+			for(Block b : a.getAllSigns()) {
+				section2.set("signs." + block + ".x", b.getX());
+				section2.set("signs." + block + ".y", b.getY());
+				section2.set("signs." + block + ".z", b.getZ());
+				section2.set("signs." + block + ".world", b.getWorld().getName());
+				++block;
+			}
 		}
 		try {
 			config.save(file);
@@ -895,10 +1091,10 @@ public class Minigames implements Listener {
 					Set<String> arenas = section.getKeys(false);
 					for(String a : arenas) {
 						if(!a.equals("name") && !a.equals("prefix") && !a.equals("command")) {
-							ConfigurationSection section2 = config.getConfigurationSection(a);
+							ConfigurationSection section2 = section.getConfigurationSection(a);
 							if(section2.isSet("name") && section2.isSet("max") && section2.isSet("min")) {
-								Arena arena = new Arena(minigame, section.getString("name"), section.getInt("min"), section.getInt("max"));
-								minigame.addArena(arena);
+								Arena arena = new Arena(minigame, section2.getString("name"), section2.getInt("min"), section2.getInt("max"));
+								minigame.addArena(arena, false);
 								if(section2.isSet("lobby.x") && section2.isSet("lobby.y") && section2.isSet("lobby.z") && section2.isSet("lobby.world")) {
 									World w = WolvSK.getInstance().getServer().getWorld(section2.getString("lobby.world"));
 									if(w!=null) {
@@ -908,12 +1104,162 @@ public class Minigames implements Listener {
 								if(section2.isSet("timer")) {
 									arena.setDefaultTimer(section2.getInt("timer"), false);
 								}
+								Integer block = 0;
+								while(section2.isSet("signs." + block)) {
+									if(section2.isSet("signs." + block + ".x") && section2.isSet("signs." + block + ".y") && section2.isSet("signs." + block + ".z") && section2.isSet("signs." + block + ".world")) {
+										World w = WolvSK.getInstance().getServer().getWorld(section2.getString("signs." + block + ".world"));
+										if(w!=null) {
+											arena.addSign(w.getBlockAt(section2.getInt("signs." + block + ".x"), section2.getInt("signs." + block + ".y"), section2.getInt("signs." + block + ".z")), false);
+										}
+									}
+									++block;
+								}
 							}
 						}
 					}
 				}
 			}
 		}
+	}
+	
+	public static void registerAll() {
+		   Classes.registerClass(new ClassInfo<Arena>(Arena.class, "arena").user("arena").name("arena").parser(new Parser<Arena>() {
+
+			@Override
+			public String getVariableNamePattern() {
+				return ".+";
+			}
+
+			@Override
+			@Nullable
+			public Arena parse(String arg0, ParseContext arg1) {
+				Pattern pattern = Pattern.compile(arg0);
+				Matcher matcher = pattern.matcher("Minigame:(.+); Arena:(.+)");
+				if(matcher.groupCount()==2 && matcher.find()) {
+					Minigame mg = Minigames.getByName(matcher.group(0));
+					if(mg!=null) {
+						return mg.getArena(matcher.group(1), false);
+					}
+				}
+				return null;
+			}
+
+			@Override
+			public String toString(Arena arg0, int arg1) {
+				return "Minigame:" + arg0.getMinigame().getName() + "; Arena:" + arg0.getName();
+			}
+
+			@Override
+			public String toVariableNameString(Arena arg0) {
+				return "Minigame:" + arg0.getMinigame().getName() + "; Arena:" + arg0.getName();
+			}
+		   
+		   }));
+		   Classes.registerClass(new ClassInfo<Minigame>(Minigame.class, "minigame").user("minigame").name("minigame").parser(new Parser<Minigame>() {
+
+			@Override
+			public String getVariableNamePattern() {
+				return ".+";
+			}
+
+			@Override
+			@Nullable
+			public Minigame parse(String arg0, ParseContext arg1) {
+				return Minigames.getByName(arg0);
+			}
+
+			@Override
+			public String toString(Minigame arg0, int arg1) {
+				return arg0.getName();
+			}
+
+			@Override
+			public String toVariableNameString(Minigame arg0) {
+				return arg0.getName();
+			}
+		   
+		   }));
+		   Skript.registerEffect(EffCreateMinigame.class, "create[ a] (minigame|mg)[ named] %string% with (command|cmd) %string% and prefix %string%");
+		   Skript.registerEffect(EffStartArena.class, "start %arena%");
+		   Skript.registerEffect(EffStopArena.class, "stop %arena%");
+		   Skript.registerEffect(EffMakeJoinArena.class, "make %player% join %arena%");
+		   Skript.registerEffect(EffMakeLeaveArena.class, "make %player% leave[ current] arena");
+		   Skript.registerEffect(EffCreateArena.class, "create[ a[n]] arena[ named] %string% with min[inimum][ player[s]] %integer%(,| and) max[inimum][ player[s]] %integer% (for|in) %minigame%");
+		   Skript.registerEffect(EffArenaBroadcast.class, "broadcast [message ]%string% in %arena%");
+		   Skript.registerCondition(CondInGame.class, "%player% is in (a[n] arena|[a ]game)");
+		   Skript.registerCondition(CondInArena.class, "%player% is in %arena%");
+		   Skript.registerCondition(CondIsStarted.class, "%arena% is started");
+		   Skript.registerExpression(ExprMinigameByName.class, Minigame.class, ExpressionType.PROPERTY, "minigame %string%");
+		   Skript.registerExpression(ExprAllMinigames.class, Minigame.class, ExpressionType.PROPERTY, "[all ]minigames");
+		   Skript.registerExpression(ExprMinigamePlayer.class, Minigame.class, ExpressionType.PROPERTY, "[current ]minigame of %player%", "%player%['s] [current ]minigame");
+		   Skript.registerExpression(ExprNameOfMinigame.class, String.class, ExpressionType.PROPERTY, "name of %minigame%", "%minigame%['s] name");
+		   Skript.registerExpression(ExprAllArenas.class, Arena.class, ExpressionType.PROPERTY, "[all ]arenas of %minigame%", "%minigame%['s] arenas");
+		   Skript.registerExpression(ExprArenaByName.class, Arena.class, ExpressionType.PROPERTY, "arena %string% in %minigame%", "%minigame%['s] arena %string%");
+		   Skript.registerExpression(ExprArenaOfPlayer.class, Arena.class, ExpressionType.PROPERTY, "[current ]arena of %player%", "%player%['s] [current ]arena");
+		   Skript.registerExpression(ExprMinigameCommand.class, String.class, ExpressionType.PROPERTY, "command of %minigame%", "%minigame%['s] command");
+		   Skript.registerExpression(ExprMinigamePrefix.class, String.class, ExpressionType.PROPERTY, "prefix of %minigame%", "%minigame%['s] prefix");
+		   Skript.registerExpression(ExprArenaLobby.class, Location.class, ExpressionType.PROPERTY, "lobby of %arena%", "%arena%['s] lobby");
+		   Skript.registerExpression(ExprMinigameOfArena.class, Minigame.class, ExpressionType.PROPERTY, "minigame of %arena%", "%arena%['s] minigame");
+		   Skript.registerExpression(ExprArenaName.class, String.class, ExpressionType.PROPERTY, "name of %arena%", "%arena%['s] name");
+		   Skript.registerExpression(ExprArenaMax.class, Integer.class, ExpressionType.PROPERTY, "max[imum][ of player[s]] of %arena%", "%arena%['s] max[imum][ of player[s]]");
+		   Skript.registerExpression(ExprArenaMin.class, Integer.class, ExpressionType.PROPERTY, "min[imum][ of player[s]] of %arena%", "%arena%['s] min[imum][ of player[s]]");
+		   Skript.registerExpression(ExprArenaCount.class, Integer.class, ExpressionType.PROPERTY, "[player ]count of %arena%", "%arena%['s] [player ]count");
+		   Skript.registerExpression(ExprArenaTimer.class, Integer.class, ExpressionType.PROPERTY, "[default ]timer of %arena%", "%arena%['s] [default ]timer");
+		   Skript.registerExpression(ExprArenaPlayers.class, Player.class, ExpressionType.PROPERTY, "[all ]players (in|of) %arena%");
+		   Skript.registerEvent("Arena Start Event", SimpleEvent.class, ArenaStartEvent.class, "arena start");
+		   EventValues.registerEventValue(ArenaStartEvent.class, Arena.class, new Getter<Arena, ArenaStartEvent>() {
+			   public Arena get(ArenaStartEvent e) {
+				   return e.getArena();
+			   }
+		   }, 0);
+		   EventValues.registerEventValue(ArenaStartEvent.class, Minigame.class, new Getter<Minigame, ArenaStartEvent>() {
+			   public Minigame get(ArenaStartEvent e) {
+				   return e.getMinigame();
+			   }
+		   }, 0);
+		   Skript.registerEvent("Arena Stop Event", SimpleEvent.class, ArenaStopEvent.class, "arena stop");
+		   EventValues.registerEventValue(ArenaStopEvent.class, Arena.class, new Getter<Arena, ArenaStopEvent>() {
+			   public Arena get(ArenaStopEvent e) {
+				   return e.getArena();
+			   }
+		   }, 0);
+		   EventValues.registerEventValue(ArenaStopEvent.class, Minigame.class, new Getter<Minigame, ArenaStopEvent>() {
+			   public Minigame get(ArenaStopEvent e) {
+				   return e.getMinigame();
+			   }
+		   }, 0);
+		   Skript.registerEvent("Player Join Arena Event", SimpleEvent.class, PlayerJoinArenaEvent.class, "[player ]arena join");
+		   EventValues.registerEventValue(PlayerJoinArenaEvent.class, Arena.class, new Getter<Arena, PlayerJoinArenaEvent>() {
+			   public Arena get(PlayerJoinArenaEvent e) {
+				   return e.getArena();
+			   }
+		   }, 0);
+		   EventValues.registerEventValue(PlayerJoinArenaEvent.class, Minigame.class, new Getter<Minigame, PlayerJoinArenaEvent>() {
+			   public Minigame get(PlayerJoinArenaEvent e) {
+				   return e.getMinigame();
+			   }
+		   }, 0);
+		   EventValues.registerEventValue(PlayerJoinArenaEvent.class, Player.class, new Getter<Player, PlayerJoinArenaEvent>() {
+			   public Player get(PlayerJoinArenaEvent e) {
+				   return e.getPlayer();
+			   }
+		   }, 0);
+		   Skript.registerEvent("Player Leave Arena Event", SimpleEvent.class, PlayerLeaveArenaEvent.class, "[player ]arena leave");
+		   EventValues.registerEventValue(PlayerLeaveArenaEvent.class, Arena.class, new Getter<Arena, PlayerLeaveArenaEvent>() {
+			   public Arena get(PlayerLeaveArenaEvent e) {
+				   return e.getArena();
+			   }
+		   }, 0);
+		   EventValues.registerEventValue(PlayerLeaveArenaEvent.class, Minigame.class, new Getter<Minigame, PlayerLeaveArenaEvent>() {
+			   public Minigame get(PlayerLeaveArenaEvent e) {
+				   return e.getMinigame();
+			   }
+		   }, 0);
+		   EventValues.registerEventValue(PlayerLeaveArenaEvent.class, Player.class, new Getter<Player, PlayerLeaveArenaEvent>() {
+			   public Player get(PlayerLeaveArenaEvent e) {
+				   return e.getPlayer();
+			   }
+		   }, 0);
 	}
 	
 	static void createFolder() {
@@ -929,5 +1275,88 @@ public class Minigames implements Listener {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	@Override
+	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+		if(sender.hasPermission("minigames.admin")) {
+			if(args.length==0) {
+				sender.sendMessage(ChatColor.GREEN + "------- Minigames ------");
+				sender.sendMessage(ChatColor.GOLD + "/minigames" + ChatColor.GREEN + " create <minigame> <command> <prefix (underscore for spaces)>");
+				sender.sendMessage(ChatColor.GOLD + "/minigames" + ChatColor.GREEN + " remove <minigame>");
+				sender.sendMessage(ChatColor.GOLD + "/minigames" + ChatColor.GREEN + " list");
+				sender.sendMessage(ChatColor.GOLD + "/minigames" + ChatColor.GREEN + " info <minigame>");
+				sender.sendMessage(ChatColor.GREEN + "------------------------");
+			}
+			else {
+				if(args[0].equalsIgnoreCase("create")) {
+					if(args.length==4) {
+						if(Minigames.getByName(args[1])==null) {
+							if(!commands.containsKey(args[2].toLowerCase())) {
+								Minigames.createMinigame(args[1], args[2].toLowerCase(), args[3], true);
+								sender.sendMessage(ChatColor.GREEN + "[Minigames] The Minigame " + ChatColor.DARK_GREEN + args[1] + ChatColor.GREEN + " has been succefully created!");
+							}
+							else {
+								sender.sendMessage(ChatColor.RED + "[Minigames] The command " + ChatColor.DARK_RED + args[2] + ChatColor.RED + " already exists!");
+							}
+						}
+						else {
+							sender.sendMessage(ChatColor.RED + "[Minigames] The Minigame " + ChatColor.DARK_RED + args[1] + ChatColor.RED + " already exists!");
+						}
+					}
+					else {
+						sender.sendMessage(ChatColor.GOLD + "/minigames" + ChatColor.GREEN + " create <minigame> <command> <prefix (underscore for spaces)>");
+					}
+				}
+				else if(args[0].equalsIgnoreCase("list")) {
+					if(args.length==1) {
+						ArrayList<String> list = new ArrayList<String>();
+						for (Entry<String, Minigame> entry : map.entrySet())
+						{
+							list.add(entry.getKey());
+						}
+						sender.sendMessage(ChatColor.GREEN + "[Minigames] List: " + ChatColor.GOLD + String.join(ChatColor.GREEN + ", " + ChatColor.GOLD, list));
+					}
+					else {
+						sender.sendMessage(ChatColor.GOLD + "/minigames" + ChatColor.GREEN + " list");
+					}
+				}
+				else if(args[0].equalsIgnoreCase("info")) {
+					if(args.length==2) {
+						if(map.containsKey(args[1])) {
+							Minigame mg = Minigames.getByName(args[1]);
+							sender.sendMessage(ChatColor.GREEN + "[Minigames] Name: " + ChatColor.DARK_GREEN +  mg.getName() + ChatColor.GREEN + ", Command: " + ChatColor.DARK_GREEN +  mg.getCommand() + ChatColor.GREEN + ", Prefix: " + ChatColor.DARK_GREEN + mg.getPrefix());
+						}
+						else {
+							sender.sendMessage(ChatColor.RED + "[Minigames] The Minigame " + ChatColor.DARK_RED + args[1] + ChatColor.RED + " doesn't exist!");
+						}
+					}
+					else {
+						sender.sendMessage(ChatColor.GOLD + "/minigames" + ChatColor.GREEN + " info <minigame>");
+					}
+				}
+				else if(args[0].equalsIgnoreCase("remove")) {
+					if(args.length==2) {
+						if(map.containsKey(args[1])) {
+							Minigames.removeMinigame(args[1], true);
+							sender.sendMessage(ChatColor.GREEN + "[Minigames] The Minigame " + ChatColor.DARK_GREEN + args[1] + ChatColor.GREEN + " has been removed!");
+						}
+						else {
+							sender.sendMessage(ChatColor.RED + "[Minigames] The Minigame " + ChatColor.DARK_RED + args[1] + ChatColor.RED + " doesn't exist!");
+						}
+					}
+					else {
+						sender.sendMessage(ChatColor.GOLD + "/minigames" + ChatColor.GREEN + " remove <minigame>");
+					}
+				}
+				else {
+					WolvSK.getInstance().getServer().dispatchCommand(sender, "minigames");
+				}
+			}
+		}
+		else {
+			sender.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
+		}
+		return true;
 	}
 }
