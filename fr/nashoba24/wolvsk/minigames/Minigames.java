@@ -551,7 +551,7 @@ public class Minigames implements Listener, CommandExecutor {
 					p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " setmin <arena> <min>");
 				}
 				if(p.hasPermission("wolvsk." + mg.getName() + ".setmax") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
-					p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " setmax <arena> <min>");
+					p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " setmax <arena> <max>");
 				}
 				if(p.hasPermission("wolvsk." + mg.getName() + ".list") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
 					p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " list");
@@ -621,7 +621,7 @@ public class Minigames implements Listener, CommandExecutor {
 				}
 				else if(args[0].equalsIgnoreCase("setmax")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".setmax") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
-						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " setmax <arena> <min>");
+						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " setmax <arena> <max>");
 					}
 					else {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
@@ -1184,7 +1184,7 @@ public class Minigames implements Listener, CommandExecutor {
 		   Skript.registerEffect(EffStopArena.class, "stop %arena%");
 		   Skript.registerEffect(EffMakeJoinArena.class, "make %player% join %arena%");
 		   Skript.registerEffect(EffMakeLeaveArena.class, "make %player% leave[ current] arena");
-		   Skript.registerEffect(EffCreateArena.class, "create[ a[n]] arena[ named] %string% with min[inimum][ player[s]] %integer%(,| and) max[inimum][ player[s]] %integer% (for|in) %minigame%");
+		   Skript.registerEffect(EffCreateArena.class, "create[ a[n]] arena[ named] %string% with min[imum][ player[s]] %integer%(,| and) max[imum][ player[s]] %integer% (for|in) %minigame%");
 		   Skript.registerEffect(EffArenaBroadcast.class, "broadcast [message ]%string% in %arena%");
 		   Skript.registerCondition(CondInGame.class, "%player% is in (a[n] arena|[a ]game)");
 		   Skript.registerCondition(CondInArena.class, "%player% is in %arena%");

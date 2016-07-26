@@ -142,46 +142,46 @@ public class Arena {
 			if(timer!=defaultTimer) {
 				if(timer>=30) {
 					if(timer % 30 == 0) {
-						this.broadcast(this.getMinigame().getFullPrefix() + " " + ChatColor.GOLD + timer + ChatColor.AQUA + " seconds left before starting!");
+						this.broadcast("" + ChatColor.GOLD + timer + ChatColor.AQUA + " seconds left before starting!");
 					}
 				}
 				else {
 					if(timer==20) {
-						this.broadcast(this.getMinigame().getFullPrefix() + " " + ChatColor.GOLD + timer + ChatColor.AQUA + " seconds left before starting!");
+						this.broadcast("" + ChatColor.GOLD + timer + ChatColor.AQUA + " seconds left before starting!");
 					}
 					else if(timer==10) {
-						this.broadcast(this.getMinigame().getFullPrefix() + " " + ChatColor.GOLD + timer + ChatColor.AQUA + " seconds left before starting!");
+						this.broadcast("" + ChatColor.GOLD + timer + ChatColor.AQUA + " seconds left before starting!");
 					}
 					else if(timer==5) {
-						this.broadcast(this.getMinigame().getFullPrefix() + " " + ChatColor.GOLD + timer + ChatColor.AQUA + " seconds left before starting!");
+						this.broadcast("" + ChatColor.GOLD + timer + ChatColor.AQUA + " seconds left before starting!");
 						Player[] list2 = this.getAllPlayers();
 						for(Player p : list2) {
 							TitleAPI.sendTitle(p, 5, 10, 5, ChatColor.GREEN + "5", "");
 						}
 					}
 					else if(timer==4) {
-						this.broadcast(this.getMinigame().getFullPrefix() + " " + ChatColor.GOLD + timer + ChatColor.AQUA + " seconds left before starting!");
+						this.broadcast("" + ChatColor.GOLD + timer + ChatColor.AQUA + " seconds left before starting!");
 						Player[] list2 = this.getAllPlayers();
 						for(Player p : list2) {
 							TitleAPI.sendTitle(p, 5, 10, 5, ChatColor.YELLOW + "4", "");
 						}
 					}
 					else if(timer==3) {
-						this.broadcast(this.getMinigame().getFullPrefix() + " " + ChatColor.GOLD + timer + ChatColor.AQUA + " seconds left before starting!");
+						this.broadcast("" + ChatColor.GOLD + timer + ChatColor.AQUA + " seconds left before starting!");
 						Player[] list2 = this.getAllPlayers();
 						for(Player p : list2) {
 							TitleAPI.sendTitle(p, 5, 10, 5, ChatColor.GOLD + "3", "");
 						}
 					}
 					else if(timer==2) {
-						this.broadcast(this.getMinigame().getFullPrefix() + " " + ChatColor.GOLD + timer + ChatColor.AQUA + " seconds left before starting!");
+						this.broadcast("" + ChatColor.GOLD + timer + ChatColor.AQUA + " seconds left before starting!");
 						Player[] list2 = this.getAllPlayers();
 						for(Player p : list2) {
 							TitleAPI.sendTitle(p, 5, 10, 5, ChatColor.RED + "2", "");
 						}
 					}
 					else if(timer==1) {
-						this.broadcast(this.getMinigame().getFullPrefix() + " " + ChatColor.GOLD + timer + ChatColor.AQUA + " second left before starting!");
+						this.broadcast("" + ChatColor.GOLD + timer + ChatColor.AQUA + " second left before starting!");
 						Player[] list2 = this.getAllPlayers();
 						for(Player p : list2) {
 							TitleAPI.sendTitle(p, 5, 10, 5, ChatColor.DARK_RED + "1", "");
