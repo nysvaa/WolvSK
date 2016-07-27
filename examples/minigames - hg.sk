@@ -1,0 +1,90 @@
+on skript start:
+	create minigame named "hungergames" with command "hg" and prefix "Hunger Games"
+	clear {hg.items::*}
+	add 1 of iron sword to {hg.items::*}
+	add 1 of bow to {hg.items::*}
+	add 16 of arrow to {hg.items::*}
+	add 3 of cooked pork to {hg.items::*}
+	add 1 of wooden sword to {hg.items::*}
+	add 1 of stone sword to {hg.items::*}
+	add 2 of apple to {hg.items::*}
+command /hungergames [<text>] [<text>]:
+	permission: hunger.games
+	executable by: players
+	trigger:
+		if arg 1 is "addspawn":
+			if arg 2 is set:
+				if size of {hg.spawns.%argument 2%::*} is smaller than 25:
+					add location of player to {hg.spawns.%argument 2%::*}
+					send "&aSpawn n°&2%size of {hg.spawns.%argument 2%::*}%&a ajouté pour l'arène &2%argument 2%&a!"
+				else:
+					send "&cTous les spawns ont déjà été placés!"
+			else:
+				send "&6/hungergames &aaddspawn <arene>"
+		else if arg 1 is "removeall":
+			if arg 2 is set:
+				send "&aTous les spawns ont été retirés pour larène &2%argument 2%&a!"
+				clear {hg.spawns.%argument 2%::*}
+			else:
+				send "&6/hungergames &aremoveall <arene>"
+		else if arg 1 is "addchest":
+			if arg 2 is set:
+				if targeted block is a chest:
+					if {hg.chests.%argument 2%::*} contains location of targeted block:
+						send "&cCe coffre est déjà ajouté!"
+					else:
+						add location of targeted block to {hg.chests.%argument 2%::*}
+						send "&aLe coffre a été ajouté à l'arène &2%argument 2%&a!"
+				else:
+					send "&cLe bloc que vous pointez n'est pas un coffre!"
+			else:
+				send "&6/hungergames &aaddchest <arene>"
+		else if arg 1 is "removechest":
+			if arg 2 is set:
+				if targeted block is a chest:
+					if {hg.chests.%argument 2%::*} contains location of targeted block:
+						remove location of targeted block from {hg.chests.%argument 2%::*}
+						send "&aCe coffre a été enlevé de l'arène &2%argument 2%&a!"
+					else:
+						send "&cCe coffre n'est pas ajouté dans l'arène &4%argument 2%&c!"
+				else:
+					send "&cLe bloc que vous pointez n'est pas un coffre!"
+			else:
+				send "&6/hungergames &aaddchest <arene>"
+on arena start:
+	clear {hg.%name of event-arena%}
+	if name of event-minigame is "hungergames":
+		loop {hg.chests.%name of event-arena%::*}:
+			clear inventory of block at loop-value
+			loop random number between 1 and 10 times:
+				set {_i} to random element out of {hg.items::*}
+				add {_i} to block at loop-value-1
+		loop all players in event-arena:
+			add 1 to {_i}
+			teleport loop-player to {hg.spawns.%name of event-arena%::%{_i}%}
+		set {_i} to 10
+		loop 10 times:
+			if event-arena is started:
+				broadcast "&6Le jeu commence dans %{_i}% secondes!" in event-arena
+				wait 1 second
+			else:
+				stop
+			remove 1 from {_i}
+		broadcast "&6GO!" in event-arena
+		set {hg.%name of event-arena%} to true
+on any movement:
+	if name of minigame of player is "hungergames":
+		if {hg.%name of arena of player%} is not set:
+			if arena of player is started:
+				cancel event
+on death of player:
+	if name of minigame of player is "hungergames":
+		strike lightning at player
+		make player leave current arena
+		send "&cVous avez perdu!" to player
+on break:
+	if name of minigame of player is "hungergames":
+		cancel event
+on place:
+	if name of minigame of player is "hungergames":
+		cancel event
