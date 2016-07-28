@@ -12,8 +12,8 @@ import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 import fr.nashoba24.wolvsk.WolvSK;
 
-public class ExprTSIP extends SimpleExpression<String>{
-	private Expression<Client> client;
+public class ExprTSClient extends SimpleExpression<Client>{
+	private Expression<String> name;
 	
 	@Override
 	public boolean isSingle() {
@@ -21,27 +21,28 @@ public class ExprTSIP extends SimpleExpression<String>{
 	}
 	
 	@Override
-	public Class<? extends String> getReturnType() {
-		return String.class;
+	public Class<? extends Client> getReturnType() {
+		return Client.class;
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean init(Expression<?>[] expr, int matchedPattern, Kleenean paramKleenean, ParseResult paramParseResult) {
-		client = (Expression<Client>) expr[0];
+		name = (Expression<String>) expr[0];
 		return true;
 	}
 	
 	@Override
 	public String toString(@Nullable Event e, boolean paramBoolean) {
-		return "ts3 ip";
+		return "ts3 client id";
 	}
 	
 	@Override
 	@Nullable
-	protected String[] get(Event e) {
-		if(WolvSK.ts3api==null || client.getSingle(e)==null) { return null; }
-		return new String[]{ client.getSingle(e).getIp() };
+	protected Client[] get(Event e) {
+		if(WolvSK.ts3api==null) { return null; }
+		Client c = WolvSK.ts3api.getClientByNameExact(name.getSingle(e), true);
+		return new Client[]{ c };
 	}
 }
 

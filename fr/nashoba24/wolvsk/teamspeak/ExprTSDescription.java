@@ -19,7 +19,7 @@ import ch.njol.util.coll.CollectionUtils;
 import fr.nashoba24.wolvsk.WolvSK;
 
 public class ExprTSDescription extends SimpleExpression<String>{
-	private Expression<String> client;
+	private Expression<Client> client;
 	
 	@Override
 	public boolean isSingle() {
@@ -34,7 +34,7 @@ public class ExprTSDescription extends SimpleExpression<String>{
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean init(Expression<?>[] expr, int matchedPattern, Kleenean paramKleenean, ParseResult paramParseResult) {
-		client = (Expression<String>) expr[0];
+		client = (Expression<Client>) expr[0];
 		return true;
 	}
 	
@@ -46,26 +46,17 @@ public class ExprTSDescription extends SimpleExpression<String>{
 	@Override
 	@Nullable
 	protected String[] get(Event e) {
-		if(WolvSK.ts3api==null) { return null; }
-		Client c = WolvSK.ts3api.getClientByNameExact(client.getSingle(e), true);
-		if(c!=null) {
-			return new String[]{ c.get(ClientProperty.CLIENT_DESCRIPTION) };
-		}
-		else {
-			return null;
-		}
+		if(WolvSK.ts3api==null || client.getSingle(e)==null) { return null; }
+		return new String[]{ client.getSingle(e).get(ClientProperty.CLIENT_DESCRIPTION) };
 	}
 	
 	@Override
 	public void change(Event e, Object[] delta, Changer.ChangeMode mode){
 		if (mode == ChangeMode.SET) {
-			if(WolvSK.ts3api==null) { return; }
-			Client c = WolvSK.ts3api.getClientByNameExact(client.getSingle(e), true);
-			if(c!=null) {
-				HashMap<ClientProperty, String> map = new HashMap<ClientProperty, String>();
-				map.put(ClientProperty.CLIENT_DESCRIPTION, (String) delta[0]);
-				WolvSK.ts3api.editClient(c.getId(), map);
-			}
+			if(WolvSK.ts3api==null || client.getSingle(e)==null) { return; }
+			HashMap<ClientProperty, String> map = new HashMap<ClientProperty, String>();
+			map.put(ClientProperty.CLIENT_DESCRIPTION, (String) delta[0]);
+			WolvSK.ts3api.editClient(client.getSingle(e).getId(), map);
 		}
 	}
 	

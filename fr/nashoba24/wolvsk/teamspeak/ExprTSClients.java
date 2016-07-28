@@ -6,7 +6,6 @@ import javax.annotation.Nullable;
 
 import org.bukkit.event.Event;
 
-import com.github.theholywaffle.teamspeak3.api.ClientProperty;
 import com.github.theholywaffle.teamspeak3.api.wrapper.Client;
 
 import ch.njol.skript.lang.Expression;
@@ -15,7 +14,7 @@ import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 import fr.nashoba24.wolvsk.WolvSK;
 
-public class ExprTSClients extends SimpleExpression<String>{
+public class ExprTSClients extends SimpleExpression<Client>{
 	
 	@Override
 	public boolean isSingle() {
@@ -23,8 +22,8 @@ public class ExprTSClients extends SimpleExpression<String>{
 	}
 	
 	@Override
-	public Class<? extends String> getReturnType() {
-		return String.class;
+	public Class<? extends Client> getReturnType() {
+		return Client.class;
 	}
 	
 	@Override
@@ -39,13 +38,13 @@ public class ExprTSClients extends SimpleExpression<String>{
 	
 	@Override
 	@Nullable
-	protected String[] get(Event e) {
+	protected Client[] get(Event e) {
 		if(WolvSK.ts3api==null) { return null; }
 		List<Client> c = WolvSK.ts3api.getClients();
-		String[] list = new String[c.size()];
+		Client[] list = new Client[c.size()];
 		Integer i = 0;
 		for(Client cl : c) {
-			list[i] = cl.get(ClientProperty.CLIENT_NICKNAME);
+			list[i] = cl;
 			++i;
 		}
 		return list;

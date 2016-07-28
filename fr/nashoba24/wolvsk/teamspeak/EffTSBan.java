@@ -14,13 +14,13 @@ import fr.nashoba24.wolvsk.WolvSK;
 
 public class EffTSBan extends Effect {
 	
-	private Expression<String> client;
+	private Expression<Client> client;
 	private Expression<String> msg;
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean init(Expression<?>[] expr, int matchedPattern, Kleenean paramKleenean, ParseResult paramParseResult) {
-		client = (Expression<String>) expr[0];
+		client = (Expression<Client>) expr[0];
 		msg = (Expression<String>) expr[1];
 		return true;
 	}
@@ -32,10 +32,7 @@ public class EffTSBan extends Effect {
 	
 	@Override
 	protected void execute(Event e) {
-		if(WolvSK.ts3api==null) { return; }
-		Client c = WolvSK.ts3api.getClientByNameExact(client.getSingle(e), true);
-		if(c!=null) {
-			WolvSK.ts3api.banClient(c.getId(), msg.getSingle(e));
-		}
+    	if(WolvSK.ts3api==null || client.getSingle(e)==null) { return; }
+		WolvSK.ts3api.banClient(client.getSingle(e).getId(), msg.getSingle(e));
 	}
 }

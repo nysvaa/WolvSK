@@ -13,7 +13,7 @@ import ch.njol.util.Kleenean;
 import fr.nashoba24.wolvsk.WolvSK;
 
 public class ExprTSClientID extends SimpleExpression<Integer>{
-	private Expression<String> client;
+	private Expression<Client> client;
 	
 	@Override
 	public boolean isSingle() {
@@ -28,7 +28,7 @@ public class ExprTSClientID extends SimpleExpression<Integer>{
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean init(Expression<?>[] expr, int matchedPattern, Kleenean paramKleenean, ParseResult paramParseResult) {
-		client = (Expression<String>) expr[0];
+		client = (Expression<Client>) expr[0];
 		return true;
 	}
 	
@@ -40,14 +40,8 @@ public class ExprTSClientID extends SimpleExpression<Integer>{
 	@Override
 	@Nullable
 	protected Integer[] get(Event e) {
-		if(WolvSK.ts3api==null) { return null; }
-		Client c = WolvSK.ts3api.getClientByNameExact(client.getSingle(e), true);
-		if(c!=null) {
-			return new Integer[]{ c.getId() };
-		}
-		else {
-			return null;
-		}
+		if(WolvSK.ts3api==null || client.getSingle(e)==null) { return null; }
+		return new Integer[]{ client.getSingle(e).getId() };
 	}
 }
 

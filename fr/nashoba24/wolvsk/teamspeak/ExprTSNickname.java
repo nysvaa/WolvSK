@@ -12,7 +12,7 @@ import ch.njol.util.Kleenean;
 import fr.nashoba24.wolvsk.WolvSK;
 
 public class ExprTSNickname extends SimpleExpression<String>{
-	private Expression<String> client;
+	private Expression<Client> client;
 	
 	@Override
 	public boolean isSingle() {
@@ -27,7 +27,7 @@ public class ExprTSNickname extends SimpleExpression<String>{
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean init(Expression<?>[] expr, int matchedPattern, Kleenean paramKleenean, ParseResult paramParseResult) {
-		client = (Expression<String>) expr[0];
+		client = (Expression<Client>) expr[0];
 		return true;
 	}
 	
@@ -39,9 +39,8 @@ public class ExprTSNickname extends SimpleExpression<String>{
 	@Override
 	@Nullable
 	protected String[] get(Event e) {
-		if(WolvSK.ts3api==null) { return null; }
-		Client c = WolvSK.ts3api.getClientByNameExact(client.getSingle(e), true);
-		return new String[]{ c.getNickname() };
+		if(WolvSK.ts3api==null || client.getSingle(e)==null) { return null; }
+		return new String[]{ client.getSingle(e).getNickname() };
 	}
 }
 
