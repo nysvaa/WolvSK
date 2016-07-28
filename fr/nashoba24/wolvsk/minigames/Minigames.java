@@ -7,9 +7,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import javax.annotation.Nullable;
 
 import org.bukkit.Bukkit;
@@ -666,7 +663,7 @@ public class Minigames implements Listener, CommandExecutor {
 				}
 				else if(args[0].equalsIgnoreCase("stop")) {
 					if(p.hasPermission("wolvsk." + mg.getName() + ".start") || p.hasPermission("wolvsk." + mg.getName() + ".admin")) {
-						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " start <arena>");
+						p.sendMessage(ChatColor.GOLD + "/" + cmd + ChatColor.GREEN + " stop <arena>");
 					}
 					else {
 						p.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
@@ -1133,14 +1130,6 @@ public class Minigames implements Listener, CommandExecutor {
 			@Override
 			@Nullable
 			public Arena parse(String arg0, ParseContext arg1) {
-				Pattern pattern = Pattern.compile(arg0);
-				Matcher matcher = pattern.matcher("Minigame:(.+); Arena:(.+)");
-				if(matcher.groupCount()==2 && matcher.find()) {
-					Minigame mg = Minigames.getByName(matcher.group(0));
-					if(mg!=null) {
-						return mg.getArena(matcher.group(1), false);
-					}
-				}
 				return null;
 			}
 
@@ -1203,7 +1192,7 @@ public class Minigames implements Listener, CommandExecutor {
 		   Skript.registerExpression(ExprArenaName.class, String.class, ExpressionType.PROPERTY, "name of %arena%", "%arena%['s] name");
 		   Skript.registerExpression(ExprArenaMax.class, Integer.class, ExpressionType.PROPERTY, "max[imum][ of player[s]] of %arena%", "%arena%['s] max[imum][ of player[s]]");
 		   Skript.registerExpression(ExprArenaMin.class, Integer.class, ExpressionType.PROPERTY, "min[imum][ of player[s]] of %arena%", "%arena%['s] min[imum][ of player[s]]");
-		   Skript.registerExpression(ExprArenaCount.class, Integer.class, ExpressionType.PROPERTY, "[player ]count of %arena%", "%arena%['s] [player ]count");
+		   Skript.registerExpression(ExprArenaCount.class, Integer.class, ExpressionType.PROPERTY, "([player ]count|number of player[s]) of %arena%", "%arena%['s] ([player ]count|number of player[s])");
 		   Skript.registerExpression(ExprArenaTimer.class, Integer.class, ExpressionType.PROPERTY, "[default ]timer of %arena%", "%arena%['s] [default ]timer");
 		   Skript.registerExpression(ExprArenaPlayers.class, Player.class, ExpressionType.PROPERTY, "[all ]players (in|of) %arena%");
 		   Skript.registerEvent("Arena Start Event", SimpleEvent.class, ArenaStartEvent.class, "arena start");

@@ -15,12 +15,12 @@ import fr.nashoba24.wolvsk.WolvSK;
 public class CondTSIsOnline extends Condition {
 
 
-    private Expression<String> client;
+    private Expression<Client> client;
 
     @SuppressWarnings("unchecked")
     @Override
     public boolean init(Expression<?>[] expr, int i, Kleenean kl, ParseResult pr) {
-        client = (Expression<String>) expr[0];
+        client = (Expression<Client>) expr[0];
         return true;
     }
 
@@ -31,9 +31,8 @@ public class CondTSIsOnline extends Condition {
 
     @Override
     public boolean check(Event e) {
-    	if(WolvSK.ts3api==null) { return false; }
-    	Client c = WolvSK.ts3api.getClientByNameExact(client.getSingle(e), true);
-    	if(c!=null) {
+    	if(WolvSK.ts3api==null || client.getSingle(e)==null) { return false; }
+    	if(!client.getSingle(e).isAway()) {
     		return true;
     	}
     	else {
