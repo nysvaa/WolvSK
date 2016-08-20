@@ -28,7 +28,7 @@ public class EffPayPoints extends Effect {
 	
 	@Override
 	public String toString(@Nullable Event e, boolean b) {
-		return "create cooldown";
+		return "pay player";
 	}
 	
 	@Override
