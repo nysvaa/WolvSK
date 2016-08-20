@@ -20,6 +20,7 @@ public class WolvSKMisc {
 		   Skript.registerExpression(ExprRandomUUID.class, UUID.class, ExpressionType.PROPERTY, "[a ]random uuid");
 		   Skript.registerExpression(ExprRandomLicenceCode.class, String.class, ExpressionType.PROPERTY, "[a ]random license code");
 		   Skript.registerExpression(ExprRandomAlphaNumericString.class, String.class, ExpressionType.PROPERTY, "[a ]random alpha[ ]numeric[al] (text|string) of length %integer%");
+		   Skript.registerExpression(ExprListSort.class, Object.class, ExpressionType.PROPERTY, "%objects% (sorted|in order)");
 	}
 	
 }
