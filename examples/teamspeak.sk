@@ -1,0 +1,29 @@
+on skript start:
+    ts connect to "127.0.0.1" with user "BotName" and credentials "serveradmin", "PasswordOfServeradmin" #Connect to ts
+command /online <text>:
+    trigger:
+        if ts client arg 1 is online: #If a client with name specified in arg 1 is online
+            ts broadcast "Hi %argument 1% :)" #Broadcast a message
+command /testConnectionTS:
+    trigger:
+        if addon is connected to ts: #If connection succeed
+            send "&aThe addon is connected, no problem :)"
+        else:
+            send "&cVerify the username, the ip, the password or the query port :p"
+command /tskick <text>:
+    trigger:
+        ts kick arg 1 due to "Kick test" #Kick a client
+        send "&aKicked!"
+command /tstempban:
+    trigger:
+        ts tempban "Kevin" due to "Kikoo!" for 666 seconds #Tempban someone
+command /tspoke <text>:
+    trigger:
+        ts poke arg 1 with msg "POOOOOOKE!" #Poke someone
+command /findtsaccount <player>:
+    trigger:
+        set {list.account.ts.%uuid of arg 1%::*} to ts ips corresponding to ip of arg 1 #Client which ip correspond to arg 1
+        loop {list.account.ts.%uuid of arg 1%::*}:
+            ts pv msg "I found you on ts, %argument 1% :D" to loop-value
+on skript stop:
+    ts disconnect #Disconnect from ts
