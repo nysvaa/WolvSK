@@ -12,18 +12,18 @@ command /testConnectionTS:
             send "&cVerify the username, the ip, the password or the query port :p"
 command /tskick <text>:
     trigger:
-        ts kick arg 1 due to "Kick test" #Kick a client
+        ts kick client "%arg 1%" due to "Kick test" #Kick a client
         send "&aKicked!"
 command /tstempban:
     trigger:
-        ts tempban "Kevin" due to "Kikoo!" for 666 seconds #Tempban someone
+        ts tempban client "Player" due to "Cheat" for 666 seconds #Tempban someone
 command /tspoke <text>:
     trigger:
-        ts poke arg 1 with msg "POOOOOOKE!" #Poke someone
+        ts poke client "%arg 1%" with msg "POOOOOOKE!" #Poke someone
 command /findtsaccount <player>:
     trigger:
-        set {list.account.ts.%uuid of arg 1%::*} to ts ips corresponding to ip of arg 1 #Client which ip correspond to arg 1
-        loop {list.account.ts.%uuid of arg 1%::*}:
+        set {_list.account.ts.%uuid of arg 1%::*} to ts ips corresponding to ip of arg 1 #Client which ip correspond to arg 1
+        loop {_list.account.ts.%uuid of arg 1%::*}:
             ts pv msg "I found you on ts, %argument 1% :D" to loop-value
 on skript stop:
     ts disconnect #Disconnect from ts
