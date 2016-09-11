@@ -14,28 +14,25 @@ import fr.nashoba24.wolvsk.WolvSK;
 
 public class EffTSRemoveFromGroup extends Effect {
 	
-	private Expression<String> client;
-	private Expression<Integer> group;
+	private Expression<Client> client;
+	private Expression<Integer> id;
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean init(Expression<?>[] expr, int matchedPattern, Kleenean paramKleenean, ParseResult paramParseResult) {
-		client = (Expression<String>) expr[0];
-		group = (Expression<Integer>) expr[1];
+		client = (Expression<Client>) expr[0];
+		id = (Expression<Integer>) expr[1];
 		return true;
 	}
 	
 	@Override
 	public String toString(@Nullable Event e, boolean b) {
-		return "ts3 remove client from group";
+		return "ts3 remove from group";
 	}
 	
 	@Override
 	protected void execute(Event e) {
-		if(WolvSK.ts3api==null) { return; }
-		Client c = WolvSK.ts3api.getClientByNameExact(client.getSingle(e), true);
-		if(c!=null) {
-			WolvSK.ts3api.removeClientFromServerGroup(group.getSingle(e), c.getId());
-		}
+    	if(WolvSK.ts3api==null || client.getSingle(e)==null) { return; }
+		WolvSK.ts3api.removeClientFromServerGroup(id.getSingle(e), client.getSingle(e).getDatabaseId());
 	}
 }

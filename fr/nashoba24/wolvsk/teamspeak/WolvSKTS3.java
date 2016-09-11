@@ -52,6 +52,8 @@ public class WolvSKTS3 {
 		   Skript.registerEffect(EffTSKickClient.class, "(teamspeak|ts[3])[ server] kick %client% (due to|because) %string%[ from server]");
 		   Skript.registerEffect(EffTSBanTemporary.class, "(teamspeak|ts[3])[ server] tempban %client% (due to|because) %string% for %integer% second[s]");
 		   Skript.registerEffect(EffTSBan.class, "(teamspeak|ts[3])[ server] ban %client% (due to|because) %string%");
+		   Skript.registerEffect(EffTSAddToGroup.class, "(teamspeak|ts[3])[ server] add %client% to [server ]group[ with id] %integer%");
+		   Skript.registerEffect(EffTSRemoveFromGroup.class, "(teamspeak|ts[3])[ server] remove %client% from [server ]group[ with id] %integer%");
 		   Skript.registerEffect(EffTSPoke.class, "(teamspeak|ts[3])[ server] poke %client% with (message|msg) %string%");
 		   Skript.registerEffect(EffTSSendPV.class, "(teamspeak|ts[3])[ server][ send] (private|pv) (message|msg) %string%[ to] %client%");
 		   Skript.registerCondition(CondTSIsOnline.class, "(teamspeak|ts[3]) %client% is online");

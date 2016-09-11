@@ -41,6 +41,7 @@ public class WolvSKMisc {
 		   Skript.registerEffect(EffCallMethodWithoutParams.class, "call (function|method) %string% [without param[meter][s]] in class[ named] %string%");
 		   if(Bukkit.getServer().getPluginManager().getPlugin("ProtocolLib") != null) {
 			   registerSteer();
+			   SignMenu.init();
 			   Skript.registerEvent("Vehicle Steer Left", SimpleEvent.class, SteerLeftEvent.class, "vehicle steer left");
 			   EventValues.registerEventValue(SteerLeftEvent.class, Player.class, new Getter<Player, SteerLeftEvent>() {
 				   public Player get(SteerLeftEvent e) {
