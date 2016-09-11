@@ -84,6 +84,9 @@ public class ExprWolvMCRaceOfPlayer extends SimpleExpression<String>{
 	@Override
 	@Nullable
 	protected String[] get(Event e) {
+		if(player.getSingle(e)==null) {
+			return null;
+		}
 		return new String[]{ WolvMC.getRace(player.getSingle(e).getName()) };
 	}
 	@Override
