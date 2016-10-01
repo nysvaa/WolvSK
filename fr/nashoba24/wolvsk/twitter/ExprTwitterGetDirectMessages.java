@@ -54,7 +54,7 @@ public class ExprTwitterGetDirectMessages extends SimpleExpression<String>{
 				ResponseList<DirectMessage> list = WolvSKTwitter.tf.getInstance().getDirectMessages(new Paging(page.getSingle(e)));
 				ArrayList<String> msg = new ArrayList<String>();
 				for(DirectMessage dm : list) {
-					msg.add(dm.getSenderScreenName() + "-" + dm.getText());
+					msg.add("@" + dm.getSenderScreenName() + " - " + dm.getText() + " (id: " + dm.getId() + ")");
 				}
 				String[] l = new String[msg.size()];
 				l = msg.toArray(l);
@@ -64,7 +64,7 @@ public class ExprTwitterGetDirectMessages extends SimpleExpression<String>{
 				ResponseList<DirectMessage> list = WolvSKTwitter.tf.getInstance().getDirectMessages();
 				ArrayList<String> msg = new ArrayList<String>();
 				for(DirectMessage dm : list) {
-					msg.add("@" + dm.getSenderScreenName() + " - " + dm.getText());
+					msg.add("@" + dm.getSenderScreenName() + " - " + dm.getText() + " (id: " + dm.getId() + ")");
 				}
 				String[] l = new String[msg.size()];
 				l = msg.toArray(l);

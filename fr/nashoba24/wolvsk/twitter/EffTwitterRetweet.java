@@ -10,9 +10,8 @@ import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.util.Kleenean;
-import fr.nashoba24.wolvsk.WolvSK;
 
-public class EffTwitterCreateFavorite extends Effect {
+public class EffTwitterRetweet extends Effect {
 	
 	private Expression<Status> status;
 	
@@ -25,17 +24,17 @@ public class EffTwitterCreateFavorite extends Effect {
 	
 	@Override
 	public String toString(@Nullable Event e, boolean b) {
-		return "create favorite";
+		return "retweet status";
 	}
 	
 	@Override
 	protected void execute(Event e) {
 		if(WolvSKTwitter.tf==null) { return; }
 		try {
-			WolvSKTwitter.tf.getInstance().createFavorite(status.getSingle(e).getId());
+			WolvSKTwitter.tf.getInstance().retweetStatus(status.getSingle(e).getId());
 		} catch (TwitterException e1) {
 			e1.printStackTrace();
-			WolvSK.getInstance().getLogger().severe("Failed to favorite status: " + e1.getMessage());
+			System.out.println("Failed to retweet: " + e1.getMessage());
 		}
 	}
 }

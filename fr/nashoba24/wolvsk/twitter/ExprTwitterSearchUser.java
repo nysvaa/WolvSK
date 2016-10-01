@@ -6,15 +6,14 @@ import javax.annotation.Nullable;
 
 import org.bukkit.event.Event;
 
-import twitter4j.Query;
-import twitter4j.Status;
 import twitter4j.TwitterException;
+import twitter4j.User;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 
-public class ExprSearchTweets extends SimpleExpression<Status>{
+public class ExprTwitterSearchUser extends SimpleExpression<User>{
 	
 	private Expression<String> search;
 	
@@ -24,8 +23,8 @@ public class ExprSearchTweets extends SimpleExpression<Status>{
 	}
 	
 	@Override
-	public Class<? extends Status> getReturnType() {
-		return Status.class;
+	public Class<? extends User> getReturnType() {
+		return User.class;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -37,16 +36,16 @@ public class ExprSearchTweets extends SimpleExpression<Status>{
 	
 	@Override
 	public String toString(@Nullable Event e, boolean paramBoolean) {
-		return "search tweets";
+		return "search users";
 	}
 	
 	@Override
 	@Nullable
-	protected Status[] get(Event e) {
+	protected User[] get(Event e) {
 		if(WolvSKTwitter.tf==null) { return null; }
 		try {
-			List<Status> result = WolvSKTwitter.tf.getInstance().search(new Query(search.getSingle(e))).getTweets();
-			Status[] l = new Status[result.size()];
+			List<User> result = WolvSKTwitter.tf.getInstance().searchUsers(search.getSingle(e), 1);
+			User[] l = new User[result.size()];
 			l = result.toArray(l);
 			return l;
 		} catch (TwitterException e1) {

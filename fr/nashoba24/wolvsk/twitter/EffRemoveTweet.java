@@ -12,7 +12,7 @@ import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.util.Kleenean;
 import fr.nashoba24.wolvsk.WolvSK;
 
-public class EffTwitterCreateFavorite extends Effect {
+public class EffRemoveTweet extends Effect {
 	
 	private Expression<Status> status;
 	
@@ -25,14 +25,14 @@ public class EffTwitterCreateFavorite extends Effect {
 	
 	@Override
 	public String toString(@Nullable Event e, boolean b) {
-		return "create favorite";
+		return "remove status";
 	}
 	
 	@Override
 	protected void execute(Event e) {
 		if(WolvSKTwitter.tf==null) { return; }
 		try {
-			WolvSKTwitter.tf.getInstance().createFavorite(status.getSingle(e).getId());
+			WolvSKTwitter.tf.getInstance().destroyStatus(status.getSingle(e).getId());
 		} catch (TwitterException e1) {
 			e1.printStackTrace();
 			WolvSK.getInstance().getLogger().severe("Failed to favorite status: " + e1.getMessage());
