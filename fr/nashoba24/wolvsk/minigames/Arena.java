@@ -24,6 +24,7 @@ public class Arena {
 	private Integer defaultTimer = 120;
 	private Integer timer = 120;
 	private ArrayList<Block> signs = new ArrayList<Block>();
+	private String chatFormat = "%player% > %message%";
 
 	public Arena(Minigame mg, String name, Integer min, Integer max) {
 		name = name.replaceAll(" ", "-");
@@ -245,6 +246,14 @@ public class Arena {
 		}
 	}
 	
+	public void chat(Player p, String msg) {
+		Player[] list = this.getAllPlayers();
+		String m = chatFormat.replaceAll("%player%", p.getName()).replaceAll("%message%", msg).replaceAll("%minigame%", this.getMinigame().getName()).replaceAll("%arena%", this.getName());
+		for(Player pl : list) {
+			pl.sendMessage(m);
+		}
+	}
+	
 	public void updateSigns() {
 		final Arena arena = this;
 		BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
@@ -289,5 +298,13 @@ public class Arena {
         		}
         	}
         }, 1L);
+	}
+	
+	public void setChatFormat(String arg0) {
+		this.chatFormat = arg0;
+	}
+	
+	public String getChatFormat() {
+		return this.chatFormat;
 	}
 }

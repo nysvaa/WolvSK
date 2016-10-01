@@ -363,7 +363,7 @@ public class Minigames implements Listener, CommandExecutor {
 		Player p = e.getPlayer();
 		if(Minigames.inGame(p)) {
 			e.setCancelled(true);
-			Minigames.getMinigame(p).getArena(p).broadcast(p.getDisplayName() + " > " + e.getMessage());
+			Minigames.getMinigame(p).getArena(p).chat(p, e.getMessage());
 			System.out.println("[Arena: " + Minigames.getMinigame(p).getArena(p).getName() + ", Minigame: " + Minigames.getMinigame(p).getName() + "] " + p.getName() + " > " + e.getMessage());
 		}
 	}
