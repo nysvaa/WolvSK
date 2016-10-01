@@ -1054,6 +1054,7 @@ public class Minigames implements Listener, CommandExecutor {
 			section2.set("max", a.getMax());
 			section2.set("min", a.getMin());
 			section2.set("timer", a.getDefaultTimer());
+			section2.set("chat-format", a.getChatFormat());
 			if(a.getLobby()!=null) {
 				section2.set("lobby.x", a.getLobby().getBlockX());
 				section2.set("lobby.y", a.getLobby().getBlockY());
@@ -1100,6 +1101,9 @@ public class Minigames implements Listener, CommandExecutor {
 								}
 								if(section2.isSet("timer")) {
 									arena.setDefaultTimer(section2.getInt("timer"), false);
+								}
+								if(section2.isSet("chat-format")) {
+									arena.setChatFormat(section2.getString("chat-format"));
 								}
 								Integer block = 0;
 								while(section2.isSet("signs." + block)) {
