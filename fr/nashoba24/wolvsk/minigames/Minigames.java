@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.Map.Entry;
+
 import javax.annotation.Nullable;
 
 import org.bukkit.Bukkit;
@@ -1199,6 +1200,7 @@ public class Minigames implements Listener, CommandExecutor {
 		   Skript.registerExpression(ExprArenaCount.class, Integer.class, ExpressionType.PROPERTY, "([player ]count|number of player[s]) of %arena%", "%arena%['s] ([player ]count|number of player[s])");
 		   Skript.registerExpression(ExprArenaTimer.class, Integer.class, ExpressionType.PROPERTY, "[default ]timer of %arena%", "%arena%['s] [default ]timer");
 		   Skript.registerExpression(ExprArenaPlayers.class, Player.class, ExpressionType.PROPERTY, "[all ]players (in|of) %arena%");
+		   Skript.registerExpression(ExprArenaChatFormat.class, String.class, ExpressionType.PROPERTY, "chat format of %arena%");
 		   Skript.registerEvent("Arena Start Event", SimpleEvent.class, ArenaStartEvent.class, "arena start");
 		   EventValues.registerEventValue(ArenaStartEvent.class, Arena.class, new Getter<Arena, ArenaStartEvent>() {
 			   public Arena get(ArenaStartEvent e) {
