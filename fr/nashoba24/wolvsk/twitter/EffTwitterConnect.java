@@ -6,6 +6,8 @@ import org.bukkit.event.Event;
 
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
+import twitter4j.auth.AccessToken;
+import twitter4j.auth.OAuth2Token;
 import twitter4j.conf.ConfigurationBuilder;
 import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
@@ -16,8 +18,6 @@ public class EffTwitterConnect extends Effect {
 	
 	private Expression<String> consumer_key;
 	private Expression<String> consumer_secret;
-	private Expression<String> access_token;
-	private Expression<String> access_token_secret;
 	private boolean debug = false;
 	
 	@SuppressWarnings("unchecked")
@@ -31,8 +31,6 @@ public class EffTwitterConnect extends Effect {
 		}
 		consumer_key = (Expression<String>) expr[0];
 		consumer_secret = (Expression<String>) expr[1];
-		access_token = (Expression<String>) expr[2];
-		access_token_secret = (Expression<String>) expr[3];
 		return true;
 	}
 	
@@ -46,20 +44,22 @@ public class EffTwitterConnect extends Effect {
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(debug)
 		  .setOAuthConsumerKey(consumer_key.getSingle(e))
-		  .setOAuthConsumerSecret(consumer_secret.getSingle(e))
-		  .setOAuthAccessToken(access_token.getSingle(e))
-		  .setOAuthAccessTokenSecret(access_token_secret.getSingle(e));
+		  .setOAuthConsumerSecret(consumer_secret.getSingle(e));
 		WolvSKTwitter.tf = new TwitterFactory(cb.build());
 		try {
+			OAuth2Token tokens = WolvSKTwitter.tf.getInstance().getOAuth2Token();
+			cb.setOAuth2AccessToken(tokens.getAccessToken());
+			cb.setOAuth2TokenType(tokens.getTokenType());
+			AccessToken tokens2 = WolvSKTwitter.tf.getInstance().getOAuthAccessToken();
+			cb.setOAuthAccessToken(tokens2.getToken());
+			cb.setOAuthAccessTokenSecret(tokens2.getTokenSecret());
+			WolvSKTwitter.tf = new TwitterFactory(cb.build());
 			if(!new TwitterFactory(cb.build()).getInstance().verifyCredentials().isVerified()) {
 				WolvSKTwitter.tf = null;
 			}
 		} catch (TwitterException e1) {
 			e1.printStackTrace();
 			WolvSKTwitter.tf = null;
-		}
-		if(WolvSKTwitter.tf!=null) {
-			WolvSKTwitter.registerListener(cb.build());
 		}
 	}
 }
