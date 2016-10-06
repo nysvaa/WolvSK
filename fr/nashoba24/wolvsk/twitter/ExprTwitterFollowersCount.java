@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import org.bukkit.event.Event;
 
+import twitter4j.TwitterException;
 import twitter4j.User;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
@@ -13,6 +14,7 @@ import ch.njol.util.Kleenean;
 public class ExprTwitterFollowersCount extends SimpleExpression<Integer>{
 	
 	private Expression<User> user;
+	private boolean self = false;
 	
 	@Override
 	public boolean isSingle() {
@@ -27,6 +29,10 @@ public class ExprTwitterFollowersCount extends SimpleExpression<Integer>{
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean init(Expression<?>[] expr, int matchedPattern, Kleenean paramKleenean, ParseResult paramParseResult) {
+		if(matchedPattern==0) {
+			self = true;
+			return true;
+		}
 		user = (Expression<User>) expr[0];
 		return true;
 	}
@@ -40,6 +46,13 @@ public class ExprTwitterFollowersCount extends SimpleExpression<Integer>{
 	@Nullable
 	protected Integer[] get(Event e) {
 		if(WolvSKTwitter.tf==null) { return null; }
+		if(self) {
+			try {
+				return new Integer[] { WolvSKTwitter.tf.getInstance().showUser(WolvSKTwitter.tf.getInstance().getAccountSettings().getScreenName()).getFollowersCount() };
+			} catch (TwitterException e1) {
+				e1.printStackTrace();
+			}
+		}
 		return new Integer[] { user.getSingle(e).getFollowersCount() };
 	}
 }

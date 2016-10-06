@@ -1,10 +1,13 @@
 package fr.nashoba24.wolvsk.twitter;
 
+import java.util.ArrayList;
+
 import javax.annotation.Nullable;
 
 import org.bukkit.event.Event;
 
 import twitter4j.Paging;
+import twitter4j.ResponseList;
 import twitter4j.Status;
 import twitter4j.TwitterException;
 import ch.njol.skript.lang.Expression;
@@ -48,10 +51,24 @@ public class ExprTwitterGetFavorites extends SimpleExpression<Status>{
 		if(WolvSKTwitter.tf==null) { return null; }
 		try {
 			if(paging) {
-				return (Status[]) WolvSKTwitter.tf.getInstance().getFavorites(new Paging(page.getSingle(e))).toArray();
+				ResponseList<Status> list = WolvSKTwitter.tf.getInstance().getFavorites();
+				ArrayList<Status> fvrt = new ArrayList<Status>();
+				for(Status status : list) {
+					fvrt.add(status);
+				}
+				Status[] l = new Status[fvrt.size()];
+				l = fvrt.toArray(l);
+				return l;
 			}
 			else {
-				return (Status[]) WolvSKTwitter.tf.getInstance().getFavorites().toArray();
+				ResponseList<Status> list = WolvSKTwitter.tf.getInstance().getFavorites(new Paging(page.getSingle(e)));
+				ArrayList<Status> fvrt = new ArrayList<Status>();
+				for(Status status : list) {
+					fvrt.add(status);
+				}
+				Status[] l = new Status[fvrt.size()];
+				l = fvrt.toArray(l);
+				return l;
 			}
 		} catch (TwitterException e1) {
 			e1.printStackTrace();

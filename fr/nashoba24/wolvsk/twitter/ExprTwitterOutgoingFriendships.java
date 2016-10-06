@@ -1,20 +1,17 @@
 package fr.nashoba24.wolvsk.twitter;
 
-import java.util.ArrayList;
-
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.event.Event;
 
-import twitter4j.ResponseList;
 import twitter4j.TwitterException;
-import twitter4j.User;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 
-public class ExprTwitterUsersBlocked extends SimpleExpression<User>{
+public class ExprTwitterOutgoingFriendships extends SimpleExpression<Long>{
 	
 	@Override
 	public boolean isSingle() {
@@ -22,8 +19,8 @@ public class ExprTwitterUsersBlocked extends SimpleExpression<User>{
 	}
 	
 	@Override
-	public Class<? extends User> getReturnType() {
-		return User.class;
+	public Class<? extends Long> getReturnType() {
+		return Long.class;
 	}
 	
 	@Override
@@ -33,24 +30,18 @@ public class ExprTwitterUsersBlocked extends SimpleExpression<User>{
 	
 	@Override
 	public String toString(@Nullable Event e, boolean paramBoolean) {
-		return "users blocked";
+		return "outgoing friendships";
 	}
 	
 	@Override
 	@Nullable
-	protected User[] get(Event e) {
+	protected Long[] get(Event e) {
 		if(WolvSKTwitter.tf==null) { return null; }
 		try {
-			ResponseList<User> list = WolvSKTwitter.tf.getInstance().getBlocksList();
-			ArrayList<User> users = new ArrayList<User>();
-			for(User u : list) {
-				users.add(u);
-			}
-			User[] l = new User[users.size()];
-			l = users.toArray(l);
-			return l;
+			return ArrayUtils.toObject(WolvSKTwitter.tf.getInstance().getOutgoingFriendships(-1).getIDs());
 		} catch (TwitterException e1) {
 			e1.printStackTrace();
+			System.out.println("Failed to get outgoing friendships: " + e1.getMessage());
 			return null;
 		}
 	}

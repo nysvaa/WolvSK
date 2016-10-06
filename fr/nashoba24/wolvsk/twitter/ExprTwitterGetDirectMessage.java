@@ -11,7 +11,7 @@ import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 
-public class ExprTwitterGetDirectMessage extends SimpleExpression<DirectMessage>{
+public class ExprTwitterGetDirectMessage extends SimpleExpression<String>{
 	
 	private Expression<Long> id;
 	
@@ -21,8 +21,8 @@ public class ExprTwitterGetDirectMessage extends SimpleExpression<DirectMessage>
 	}
 	
 	@Override
-	public Class<? extends DirectMessage> getReturnType() {
-		return DirectMessage.class;
+	public Class<? extends String> getReturnType() {
+		return String.class;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -39,10 +39,11 @@ public class ExprTwitterGetDirectMessage extends SimpleExpression<DirectMessage>
 	
 	@Override
 	@Nullable
-	protected DirectMessage[] get(Event e) {
+	protected String[] get(Event e) {
 		if(WolvSKTwitter.tf==null) { return null; }
 		try {
-			return new DirectMessage[] { WolvSKTwitter.tf.getInstance().showDirectMessage(id.getSingle(e)) };
+			DirectMessage msg = WolvSKTwitter.tf.getInstance().showDirectMessage(id.getSingle(e));
+			return new String[] { "@" + msg.getSenderScreenName() + " - " + msg.getText() + "(" + msg.getId() + ")" };
 		} catch (TwitterException e1) {
 			e1.printStackTrace();
 			return null;
