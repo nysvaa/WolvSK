@@ -26,6 +26,7 @@ import fr.nashoba24.wolvsk.pvparena.WolvSKPvpArena;
 import fr.nashoba24.wolvsk.serverquery.WolvSKPing;
 import fr.nashoba24.wolvsk.supertrails.WolvSKSuperTrails;
 import fr.nashoba24.wolvsk.teamspeak.WolvSKTS3;
+import fr.nashoba24.wolvsk.twitter.WolvSKTwitter;
 import fr.nashoba24.wolvsk.wolvmc.WolvSKWolvMC;
 
 public class WolvSK extends JavaPlugin implements Listener, PluginMessageListener {
@@ -62,6 +63,7 @@ public class WolvSK extends JavaPlugin implements Listener, PluginMessageListene
 		   WolvSKTS3.registerAll();
 		   WolvSKWolvMC.registerAll();
 		   WolvSKPlayerPoints.registerAll();
+		   WolvSKTwitter.registerAll();
 		   Bukkit.getLogger().info(ChatColor.translateAlternateColorCodes('&', "&aWolvSK Enabled!"));
 	  }
 
