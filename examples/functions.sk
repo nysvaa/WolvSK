@@ -1,0 +1,2 @@
+function openMenu(p: player, menu: text):
+  call function "openPluginMenu" with parameters {_p} and {_menu} in class "com.gmail.filoghost.chestcommands.api.ChestCommandsAPI"
