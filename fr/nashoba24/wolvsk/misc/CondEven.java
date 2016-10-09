@@ -28,7 +28,7 @@ public class CondEven extends Condition {
 
     @Override
     public boolean check(Event e) {
-    	if(number.getSingle(e).intValue() % 2 == 0) {
+    	if((number.getSingle(e).intValue() & 1) == 0) {
     		return true;
     	}
     	else {

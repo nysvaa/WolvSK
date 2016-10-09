@@ -28,7 +28,7 @@ public class CondOdd extends Condition {
 
     @Override
     public boolean check(Event e) {
-    	if(number.getSingle(e).intValue() % 2 != 0) {
+    	if((number.getSingle(e).intValue() & 1) == 1) {
     		return true;
     	}
     	else {
