@@ -24,7 +24,6 @@ public class Arena {
 	private Integer defaultTimer = 120;
 	private Integer timer = 120;
 	private ArrayList<Block> signs = new ArrayList<Block>();
-	private String chatFormat = "%player% > %message%";
 
 	public Arena(Minigame mg, String name, Integer min, Integer max) {
 		name = name.replaceAll(" ", "-");
@@ -143,46 +142,46 @@ public class Arena {
 			if(timer!=defaultTimer) {
 				if(timer>=30) {
 					if(timer % 30 == 0) {
-						this.broadcast("" + ChatColor.GOLD + timer + ChatColor.AQUA + " seconds left before starting!");
+						this.broadcast(Minigames.getMessage(timer + " seconds left before starting!", this.getMinigame().getPrefix(), false));
 					}
 				}
 				else {
 					if(timer==20) {
-						this.broadcast("" + ChatColor.GOLD + timer + ChatColor.AQUA + " seconds left before starting!");
+						this.broadcast(Minigames.getMessage(timer + " seconds left before starting!", this.getMinigame().getPrefix(), false));
 					}
 					else if(timer==10) {
-						this.broadcast("" + ChatColor.GOLD + timer + ChatColor.AQUA + " seconds left before starting!");
+						this.broadcast(Minigames.getMessage(timer + " seconds left before starting!", this.getMinigame().getPrefix(), false));
 					}
 					else if(timer==5) {
-						this.broadcast("" + ChatColor.GOLD + timer + ChatColor.AQUA + " seconds left before starting!");
+						this.broadcast(Minigames.getMessage(timer + " seconds left before starting!", this.getMinigame().getPrefix(), false));
 						Player[] list2 = this.getAllPlayers();
 						for(Player p : list2) {
 							TitleAPI.sendTitle(p, 5, 10, 5, ChatColor.GREEN + "5", "");
 						}
 					}
 					else if(timer==4) {
-						this.broadcast("" + ChatColor.GOLD + timer + ChatColor.AQUA + " seconds left before starting!");
+						this.broadcast(Minigames.getMessage(timer + " seconds left before starting!", this.getMinigame().getPrefix(), false));
 						Player[] list2 = this.getAllPlayers();
 						for(Player p : list2) {
 							TitleAPI.sendTitle(p, 5, 10, 5, ChatColor.YELLOW + "4", "");
 						}
 					}
 					else if(timer==3) {
-						this.broadcast("" + ChatColor.GOLD + timer + ChatColor.AQUA + " seconds left before starting!");
+						this.broadcast(Minigames.getMessage(timer + " seconds left before starting!", this.getMinigame().getPrefix(), false));
 						Player[] list2 = this.getAllPlayers();
 						for(Player p : list2) {
 							TitleAPI.sendTitle(p, 5, 10, 5, ChatColor.GOLD + "3", "");
 						}
 					}
 					else if(timer==2) {
-						this.broadcast("" + ChatColor.GOLD + timer + ChatColor.AQUA + " seconds left before starting!");
+						this.broadcast(Minigames.getMessage(timer + " seconds left before starting!", this.getMinigame().getPrefix(), false));
 						Player[] list2 = this.getAllPlayers();
 						for(Player p : list2) {
 							TitleAPI.sendTitle(p, 5, 10, 5, ChatColor.RED + "2", "");
 						}
 					}
 					else if(timer==1) {
-						this.broadcast("" + ChatColor.GOLD + timer + ChatColor.AQUA + " second left before starting!");
+						this.broadcast(Minigames.getMessage(timer + " seconds left before starting!", this.getMinigame().getPrefix(), false));
 						Player[] list2 = this.getAllPlayers();
 						for(Player p : list2) {
 							TitleAPI.sendTitle(p, 5, 10, 5, ChatColor.DARK_RED + "1", "");
@@ -217,7 +216,7 @@ public class Arena {
 	public void broadcast(String msg) {
 		Player[] list = this.getAllPlayers();
 		for(Player p : list) {
-			p.sendMessage(this.getMinigame().getFullPrefix() + " " + msg);
+			p.sendMessage(msg);
 		}
 	}
 	
@@ -248,7 +247,7 @@ public class Arena {
 	
 	public void chat(Player p, String msg) {
 		Player[] list = this.getAllPlayers();
-		String m = chatFormat.replaceAll("%player%", p.getName()).replaceAll("%message%", msg).replaceAll("%minigame%", this.getMinigame().getName()).replaceAll("%arena%", this.getName());
+		String m = Minigames.chatFormat.replaceAll("%player%", p.getName()).replaceAll("%message%", msg).replaceAll("%minigame%", this.getMinigame().getPrefix()).replaceAll("%arena%", this.getName());
 		for(Player pl : list) {
 			pl.sendMessage(m);
 		}
@@ -298,13 +297,5 @@ public class Arena {
         		}
         	}
         }, 1L);
-	}
-	
-	public void setChatFormat(String arg0) {
-		this.chatFormat = arg0;
-	}
-	
-	public String getChatFormat() {
-		return this.chatFormat;
 	}
 }

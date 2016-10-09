@@ -62,6 +62,8 @@ public class Minigames implements Listener, CommandExecutor {
 	static HashMap<String, Float> exp = new HashMap<String, Float>();
 	static HashMap<String, ItemStack[]> inv = new HashMap<String, ItemStack[]>();
 	static HashMap<String, Location> ancLoc = new HashMap<String, Location>();
+	public static String chatFormat = "%player% > %message%";
+	public static String messageFormat = "&6[%minigame%] &r&b%message%";
 	static boolean init = false;
 	
 	public static Minigame createMinigame(String name, String command, String prefix, boolean save) {
@@ -184,14 +186,14 @@ public class Minigames implements Listener, CommandExecutor {
 		}
 		if(Minigames.inGame(p)) {
 			if(message) {
-				p.sendMessage(ChatColor.RED + "[" + mg.getPrefix() + "] You are already in an arena!");
+				p.sendMessage(Minigames.getMessage("You are already in an arena!", mg.getPrefix(), true));
 			}
 			return false;
 		}
 		else {
 			if(arena.isStarted()) {
 				if(message) {
-					p.sendMessage(ChatColor.RED + "[" + mg.getPrefix() + "] This arena has started!");
+					p.sendMessage(Minigames.getMessage("This arena has started!", mg.getPrefix(), true));
 				}
 				return false;
 			}
@@ -199,7 +201,7 @@ public class Minigames implements Listener, CommandExecutor {
 				if(arena.playersCount()>=arena.getMax()) {
 					if(!p.hasPermission("wolvsk.vip.kick")) {
 						if(message) {
-							p.sendMessage(ChatColor.RED + "[" + mg.getPrefix() + "] This arena is full!");
+							p.sendMessage(Minigames.getMessage("This arena is full!", mg.getPrefix(), true));
 						}
 						return false;
 					}
@@ -217,7 +219,7 @@ public class Minigames implements Listener, CommandExecutor {
 					}
 					else {
 						if(message) {
-							p.sendMessage(ChatColor.RED + "[" + mg.getPrefix() + "] You can't join this arena because there is no player that can be kicked!");
+							p.sendMessage(Minigames.getMessage("You can't join this arena because there is no player that can be kicked!", mg.getPrefix(), true));
 						}
 						return false;
 					}
@@ -248,14 +250,14 @@ public class Minigames implements Listener, CommandExecutor {
 		if(!force) {
 			if(!Minigames.inGame(p)) {
 				if(msg) {
-					p.sendMessage(ChatColor.RED + "[" + prefix + "] You are not in a game!");
+					p.sendMessage(Minigames.getMessage("You are not in a game!", prefix, true));
 				}
 				return false;
 			}
 			else {
 				if(Minigames.getMinigame(p).getArena(p).isStarted()) {
 					if(msg) {
-						p.sendMessage(ChatColor.RED + "[" + prefix + "] The game is started!");
+						p.sendMessage(Minigames.getMessage("The game is started!", prefix, true));
 					}
 					return false;
 				}
@@ -497,12 +499,12 @@ public class Minigames implements Listener, CommandExecutor {
 					if(sign.getLine(0).equals(ChatColor.GREEN + "[" + mg.getPrefix() + "]")) {
 						if(mg.getArena(sign.getLine(1), false)!=null && sign.getLine(3).equals(ChatColor.GREEN + "join")) {
 							if(mg.getArena(sign.getLine(1), false).getLobby()==null) {
-								e.getPlayer().sendMessage(ChatColor.RED + "[" + mg.getPrefix() + "] The arena " + ChatColor.DARK_RED + sign.getLine(1) + ChatColor.RED + " is not ready to be used!");
+								e.getPlayer().sendMessage(Minigames.getMessage("The arena " + ChatColor.DARK_RED + sign.getLine(1) + ChatColor.RED + " is not ready to be used!", mg.getPrefix(), true));
 								return;
 							}
 							boolean success = join(e.getPlayer(), mg, mg.getArena(sign.getLine(1), false), true);
 							if(success) {
-								mg.getArena(sign.getLine(1), false).broadcast(ChatColor.GOLD + " " + e.getPlayer().getName() + ChatColor.AQUA + " joined the game!");
+								mg.getArena(sign.getLine(1), false).broadcast(Minigames.getMessage(e.getPlayer().getName() + " joined the game!", mg.getPrefix(), false));
 							}
 						}
 					}
@@ -1055,7 +1057,6 @@ public class Minigames implements Listener, CommandExecutor {
 			section2.set("max", a.getMax());
 			section2.set("min", a.getMin());
 			section2.set("timer", a.getDefaultTimer());
-			section2.set("chat-format", a.getChatFormat());
 			if(a.getLobby()!=null) {
 				section2.set("lobby.x", a.getLobby().getBlockX());
 				section2.set("lobby.y", a.getLobby().getBlockY());
@@ -1079,7 +1080,25 @@ public class Minigames implements Listener, CommandExecutor {
 	}
 	
 	public static void load() {
-		File file = new File(WolvSK.getInstance().getDataFolder() + "/minigames.yml");
+		File file = new File(WolvSK.getInstance().getDataFolder() + "/mg-settings.yml");
+		if(file.exists()) {
+			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+			if(config.isSet("chat-format")) {
+				Minigames.chatFormat = config.getString("chat-format");
+			}
+			if(config.isSet("message-format")) {
+				Minigames.messageFormat = config.getString("message-format");
+			}
+			try {
+				config.save(file);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		else {
+			saveFormats();
+		}
+		file = new File(WolvSK.getInstance().getDataFolder() + "/minigames.yml");
 		if(file.exists()) {
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 			Set<String> mgs = config.getKeys(false);
@@ -1102,9 +1121,6 @@ public class Minigames implements Listener, CommandExecutor {
 								}
 								if(section2.isSet("timer")) {
 									arena.setDefaultTimer(section2.getInt("timer"), false);
-								}
-								if(section2.isSet("chat-format")) {
-									arena.setChatFormat(section2.getString("chat-format"));
 								}
 								Integer block = 0;
 								while(section2.isSet("signs." + block)) {
@@ -1200,7 +1216,8 @@ public class Minigames implements Listener, CommandExecutor {
 		   Skript.registerExpression(ExprArenaCount.class, Integer.class, ExpressionType.PROPERTY, "([player ]count|number of player[s]) of %arena%", "%arena%['s] ([player ]count|number of player[s])");
 		   Skript.registerExpression(ExprArenaTimer.class, Integer.class, ExpressionType.PROPERTY, "[default ]timer of %arena%", "%arena%['s] [default ]timer");
 		   Skript.registerExpression(ExprArenaPlayers.class, Player.class, ExpressionType.PROPERTY, "[all ]players (in|of) %arena%");
-		   Skript.registerExpression(ExprArenaChatFormat.class, String.class, ExpressionType.PROPERTY, "chat format of %arena%");
+		   Skript.registerExpression(ExprMinigameChatFormat.class, String.class, ExpressionType.PROPERTY, "chat format of minigames");
+		   Skript.registerExpression(ExprMinigameMessageFormat.class, String.class, ExpressionType.PROPERTY, "message format of minigames");
 		   Skript.registerEvent("Arena Start Event", SimpleEvent.class, ArenaStartEvent.class, "arena start");
 		   EventValues.registerEventValue(ArenaStartEvent.class, Arena.class, new Getter<Arena, ArenaStartEvent>() {
 			   public Arena get(ArenaStartEvent e) {
@@ -1353,5 +1370,33 @@ public class Minigames implements Listener, CommandExecutor {
 			sender.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command!");
 		}
 		return true;
+	}
+	
+	public static String getMessage(String msg, String prefix, boolean error) {
+		if(error) {
+			return ChatColor.RED + ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', Minigames.messageFormat.replaceAll("%minigame%", prefix).replaceAll("%message%", msg)));
+		}
+		else {
+			return ChatColor.translateAlternateColorCodes('&', Minigames.messageFormat.replaceAll("%minigame%", prefix).replaceAll("%message%", msg));
+		}
+	}
+	
+	public static void saveFormats() {
+		File file = new File(WolvSK.getInstance().getDataFolder() + "/mg-settings.yml");
+		if(!file.exists()) {
+			try {
+				file.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("chat-format", Minigames.chatFormat);
+		config.set("message-format", Minigames.messageFormat);
+		try {
+			config.save(file);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
