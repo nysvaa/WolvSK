@@ -4,21 +4,12 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.ListenerPriority;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.events.PacketEvent;
-
 import ch.njol.skript.Skript;
 import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.util.SimpleEvent;
 import ch.njol.skript.registrations.EventValues;
 import ch.njol.skript.util.Getter;
 import ch.njol.skript.util.Timespan;
-import fr.nashoba24.wolvsk.WolvSK;
 
 public class WolvSKMisc {
 
@@ -40,8 +31,7 @@ public class WolvSKMisc {
 		   Skript.registerEffect(EffCallMethodWithParams.class, "call (function|method) %string% with param[meter][s] %objects% in class[ named] %string%");
 		   Skript.registerEffect(EffCallMethodWithoutParams.class, "call (function|method) %string% [without param[meter][s]] in class[ named] %string%");
 		   if(Bukkit.getServer().getPluginManager().getPlugin("ProtocolLib") != null) {
-			   registerSteer();
-			   SignMenu.init();
+			   WolvSKSteer.registerSteer();
 			   Skript.registerEvent("Vehicle Steer Left", SimpleEvent.class, SteerLeftEvent.class, "vehicle steer left");
 			   EventValues.registerEventValue(SteerLeftEvent.class, Player.class, new Getter<Player, SteerLeftEvent>() {
 				   public Player get(SteerLeftEvent e) {
@@ -73,36 +63,5 @@ public class WolvSKMisc {
 				   }
 			   }, 0);
 		   }
-	}
-	
-	public static void registerSteer() {
-        ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
-        protocolManager.addPacketListener(new PacketAdapter(WolvSK.getInstance(), ListenerPriority.NORMAL, PacketType.Play.Client.STEER_VEHICLE) {
-            @Override
-            public void onPacketReceiving(PacketEvent event) {
-                final Player player = event.getPlayer();
-                if(event.getPacketType() == PacketType.Play.Client.STEER_VEHICLE && player.getVehicle() != null) {
-                    final PacketContainer packet = event.getPacket();
-                    final float sideways = packet.getFloat().readSafely(0);
-                    final float forward = packet.getFloat().readSafely(1);
-                    final Boolean jump = packet.getBooleans().readSafely(0);
-                    if(sideways>0) {
-                    	WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerLeftEvent(player));
-                    }
-                    else if(sideways<0) {
-                    	WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerRightEvent(player));
-                    }
-                    if(forward>0) {
-                    	WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerForwardEvent(player));
-                    }
-                    else if(forward<0) {
-                    	WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerBackwardEvent(player));
-                    }
-                    if(jump) {
-                    	WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerJumpEvent(player));
-                    }
-                }
-            }
-        });
 	}
 }
