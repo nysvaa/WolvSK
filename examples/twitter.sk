@@ -5,3 +5,38 @@ command /winevent <player>:
       if player is op:
         broadcast "%player% won the event!"
         tweet "Winner of the today's event: %player%"
+
+command /mentiontimeline:
+	trigger:
+		if player is op:
+			set {tweets.save::*} to mention timeline
+			loop {tweets.save::*}:
+				send "%loop-index%) &1%author of loop-value%&r: %text of loop-value%"
+command /hometimeline:
+	trigger:
+		if player is op:
+			set {tweets.save::*} to home timeline
+			loop {tweets.save::*}:
+				send "%loop-index%) &1%author of loop-value%&r: %text of loop-value%"
+command /retweet <integer>:
+	trigger:
+		if player is op:
+			if {tweets.save::%arg-1%} is set:
+				retweet {tweets.save::%arg-1%}
+				send "&aTweet of &1%author of {tweets.save::%arg-1%}%&a retweeted!" to player
+			else:
+				send "&cThat tweet doesn't exist! Do /hometimeline or /mentiontimeline to get tweets and numbers" to player
+command /favorite <integer>:
+	trigger:
+		if player is op:
+			if {tweets.save::%arg-1%} is set:
+				favorite {tweets.save::%arg-1%}
+				send "&aTweet of &1@%author of {tweets.save::%arg-1%}%&a favorited!" to player
+			else:
+				send "&cThat tweet doesn't exist! Do /hometimeline or /mentiontimeline to get tweets and numbers" to player
+                
+command /follow <text>:
+	trigger:
+		if player is op:
+			follow user with screen name arg 1
+			send "&aYou follow &1@%argument 1% now!"
