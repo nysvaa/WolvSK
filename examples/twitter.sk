@@ -40,3 +40,35 @@ command /follow <text>:
 		if player is op:
 			follow user with screen name arg 1
 			send "&aYou follow &1@%argument 1% now!"
+
+command /followback:
+	trigger:
+		if player is op:
+			set {_l::*} to my followers
+			loop {_l::*}:
+				follow loop-value
+			send "&aDone!"
+			
+#################################################################################
+Types:
+- twitterer (an user)
+- tweet
+
+How to get a twitterer:
+1) By his name: user with screen name %text%
+2) By his id: user with id %long%
+3) By a tweet: author of %tweet% OR twitterer of %tweet%
+4) By a followers list: followers of %twitterer%
+5) By a friend list: twitter friends of %twitterer%
+6) By the blocked users list: twitter blocked users
+7) By the research: search user with query %text%
+
+How to get a tweet:
+1) By the research: search tweets with query %text%
+2) By your favorites list: favorites tweets
+3) By your home timeline: home timeline
+4) By your mention timeline: mention timeline
+5) By the timeline of a twitterer
+6) By the retweets of a tweet: retweets of %tweet%
+7) By his id: tweet with id %long%
+8) By the timeline of a twitterer: timeline of %twitterer%
