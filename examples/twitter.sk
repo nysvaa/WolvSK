@@ -68,7 +68,6 @@ How to get a tweet:
 2) By your favorites list: favorites tweets
 3) By your home timeline: home timeline
 4) By your mention timeline: mention timeline
-5) By the timeline of a twitterer
-6) By the retweets of a tweet: retweets of %tweet%
-7) By his id: tweet with id %long%
-8) By the timeline of a twitterer: timeline of %twitterer%
+5) By the retweets of a tweet: retweets of %tweet%
+6) By his id: tweet with id %long%
+7) By the timeline of a twitterer: timeline of %twitterer%
