@@ -1,17 +1,28 @@
 package fr.nashoba24.wolvsk.misc;
 
+import java.util.HashMap;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.scheduler.BukkitScheduler;
+
 import ch.njol.skript.Skript;
 import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.util.SimpleEvent;
 import ch.njol.skript.registrations.EventValues;
 import ch.njol.skript.util.Getter;
 import ch.njol.skript.util.Timespan;
+import fr.nashoba24.wolvsk.WolvSK;
 
-public class WolvSKMisc {
+public class WolvSKMisc implements Listener {
+	
+	public static HashMap<String, Integer> lastDeath = new HashMap<String, Integer>();
+	public static String[] insults = new String[]{"srx", "ptn", "fdp", "ntm", "wtf", "pd"};
 
 	public static void registerAll() {
 		   Skript.registerExpression(ExprNameOfBlock.class, String.class, ExpressionType.PROPERTY, "name of %block%", "%block%['s] name");
@@ -30,6 +41,35 @@ public class WolvSKMisc {
 		   Skript.registerExpression(ExprReturnOfMethodWithoutParams.class, Object.class, ExpressionType.PROPERTY, "return of (function|method) %string% [without param[meter][s]] in class[ named] %string%");
 		   Skript.registerEffect(EffCallMethodWithParams.class, "call (function|method) %string% with param[meter][s] %objects% in class[ named] %string%");
 		   Skript.registerEffect(EffCallMethodWithoutParams.class, "call (function|method) %string% [without param[meter][s]] in class[ named] %string%");
+		   Skript.registerEvent("Rage Event", SimpleEvent.class, PlayerRageEvent.class, "[player ]rage");
+		   String version = WolvSK.getInstance().getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
+		   switch(version) {
+		   		case "v1_8_R1":
+		   			Skript.registerEffect(EffSpectate1_8_R1.class, "make %player% spectate %entity%");
+		   			Skript.registerEffect(EffUnspectate1_8_R1.class, "make %player% unspectate");
+		   			break;
+		   		case "v1_9_R1":
+		   			Skript.registerEffect(EffSpectate1_9_R1.class, "make %player% spectate %entity%");
+		   			Skript.registerEffect(EffUnspectate1_9_R1.class, "make %player% unspectate");
+		   			break;
+		   		case "v1_9_R2":
+		   			Skript.registerEffect(EffSpectate1_9_R2.class, "make %player% spectate %entity%");
+		   			Skript.registerEffect(EffUnspectate1_9_R2.class, "make %player% unspectate");
+		   			break;
+		   		case "v1_10_R1":
+		   			Skript.registerEffect(EffSpectate1_10_R1.class, "make %player% spectate %entity%");
+		   			Skript.registerEffect(EffUnspectate1_10_R1.class, "make %player% unspectate");
+		   			break;
+		   		case "v1_11_R1":
+		   			Skript.registerEffect(EffSpectate1_11_R1.class, "make %player% spectate %entity%");
+		   			Skript.registerEffect(EffUnspectate1_11_R1.class, "make %player% unspectate");
+		   			break;
+		   }
+		   EventValues.registerEventValue(PlayerRageEvent.class, Player.class, new Getter<Player, PlayerRageEvent>() {
+			   public Player get(PlayerRageEvent e) {
+				   return e.getPlayer();
+			   }
+		   }, 0);
 		   if(Bukkit.getServer().getPluginManager().getPlugin("ProtocolLib") != null) {
 			   WolvSKSteer.registerSteer();
 			   Skript.registerEvent("Vehicle Steer Left", SimpleEvent.class, SteerLeftEvent.class, "vehicle steer left");
@@ -63,5 +103,31 @@ public class WolvSKMisc {
 				   }
 			   }, 0);
 		   }
+	}
+	
+	@EventHandler
+	public void onRage(AsyncPlayerChatEvent e) {
+		if(lastDeath.containsKey(e.getPlayer().getName())) {
+			for(String s : insults) {
+				if(e.getMessage().contains(s)) {
+					WolvSK.getInstance().getServer().getPluginManager().callEvent(new PlayerRageEvent(e.getPlayer()));
+				}
+			}
+		}
+	}
+	
+	@EventHandler
+	public void onDeath(final PlayerDeathEvent e) {
+		if(lastDeath.containsKey(e.getEntity().getName())) {
+			Bukkit.getServer().getScheduler().cancelTask(lastDeath.get(e.getEntity().getName()));
+		}
+		BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
+		int t = scheduler.scheduleSyncDelayedTask(WolvSK.getPlugin(WolvSK.class), new Runnable() {
+			@Override
+			public void run() {
+				WolvSKMisc.lastDeath.remove(e.getEntity().getName());
+			}
+		}, 20 * 15L);
+		WolvSKMisc.lastDeath.put(e.getEntity().getName(), t);
 	}
 }
