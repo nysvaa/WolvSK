@@ -45,24 +45,24 @@ public class WolvSKMisc implements Listener {
 		   String version = WolvSK.getInstance().getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
 		   switch(version) {
 		   		case "v1_8_R1":
-		   			Skript.registerEffect(EffSpectate1_8_R1.class, "make %player% spectate %entity%");
-		   			Skript.registerEffect(EffUnspectate1_8_R1.class, "make %player% unspectate");
+		   			Skript.registerEffect(EffSpectate1_8_R1.class, "wolvsk make %player% spectate %entity%");
+		   			Skript.registerEffect(EffUnspectate1_8_R1.class, "wolvsk make %player% stop spectating");
 		   			break;
 		   		case "v1_9_R1":
-		   			Skript.registerEffect(EffSpectate1_9_R1.class, "make %player% spectate %entity%");
-		   			Skript.registerEffect(EffUnspectate1_9_R1.class, "make %player% unspectate");
+		   			Skript.registerEffect(EffSpectate1_9_R1.class, "wolvsk make %player% spectate %entity%");
+		   			Skript.registerEffect(EffUnspectate1_9_R1.class, "wolvsk make %player% stop spectating");
 		   			break;
 		   		case "v1_9_R2":
-		   			Skript.registerEffect(EffSpectate1_9_R2.class, "make %player% spectate %entity%");
-		   			Skript.registerEffect(EffUnspectate1_9_R2.class, "make %player% unspectate");
+		   			Skript.registerEffect(EffSpectate1_9_R2.class, "wolvsk make %player% spectate %entity%");
+		   			Skript.registerEffect(EffUnspectate1_9_R2.class, "wolvsk make %player% stop spectating");
 		   			break;
 		   		case "v1_10_R1":
-		   			Skript.registerEffect(EffSpectate1_10_R1.class, "make %player% spectate %entity%");
-		   			Skript.registerEffect(EffUnspectate1_10_R1.class, "make %player% unspectate");
+		   			Skript.registerEffect(EffSpectate1_10_R1.class, "wolvsk make %player% spectate %entity%");
+		   			Skript.registerEffect(EffUnspectate1_10_R1.class, "wolvsk make %player% stop spectating");
 		   			break;
 		   		case "v1_11_R1":
-		   			Skript.registerEffect(EffSpectate1_11_R1.class, "make %player% spectate %entity%");
-		   			Skript.registerEffect(EffUnspectate1_11_R1.class, "make %player% unspectate");
+		   			Skript.registerEffect(EffSpectate1_11_R1.class, "wolvsk make %player% spectate %entity%");
+		   			Skript.registerEffect(EffUnspectate1_11_R1.class, "wolvsk make %player% stop spectating");
 		   			break;
 		   }
 		   EventValues.registerEventValue(PlayerRageEvent.class, Player.class, new Getter<Player, PlayerRageEvent>() {
