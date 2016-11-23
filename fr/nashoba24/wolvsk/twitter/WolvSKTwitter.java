@@ -7,14 +7,28 @@ import ch.njol.skript.classes.ClassInfo;
 import ch.njol.skript.classes.Parser;
 import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.ParseContext;
+import ch.njol.skript.lang.util.SimpleEvent;
 import ch.njol.skript.registrations.Classes;
+import ch.njol.skript.registrations.EventValues;
+import ch.njol.skript.util.Getter;
+import fr.nashoba24.wolvsk.WolvSK;
+import twitter4j.DirectMessage;
+import twitter4j.StallWarning;
 import twitter4j.Status;
+import twitter4j.StatusDeletionNotice;
+import twitter4j.StatusListener;
+import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
+import twitter4j.TwitterStream;
+import twitter4j.TwitterStreamFactory;
 import twitter4j.User;
+import twitter4j.UserList;
+import twitter4j.UserStreamListener;
 
 public class WolvSKTwitter {
 
 	public static TwitterFactory tf;
+	public static TwitterStream twitterStream;
 	
 	public static void registerAll() {
 		Classes.registerClass(new ClassInfo<User>(User.class, "twitterer").user("twitterer").name("twitterer").parser(new Parser<User>() {
@@ -73,10 +87,11 @@ public class WolvSKTwitter {
 		Skript.registerCondition(CondTwitterDiscoverableByEmail.class, "twitter account is discoverable by [e]mail");
 		Skript.registerCondition(CondTwitterGeoEnabled.class, "twitter account is geo enabled");
 		Skript.registerCondition(CondTwitterDiscoverableByEmail.class, "%tweet% is favorited");
+		Skript.registerCondition(CondTwitterAddonConnected.class, "addon is connected to twitter");
 		Skript.registerEffect(EffPostTweet.class, "tweet %string%");
 		Skript.registerEffect(EffRemoveTweet.class, "destroy %tweet%");
 		Skript.registerEffect(EffTwitterBlockUser.class, "block %twitterer%");
-		Skript.registerEffect(EffTwitterConnect.class, "twitter connect with consumer key %string%, consumer secret %string%, access token %string%( and|,) secret token %string%", "twitter debug connect with consumer key %string%, consumer secret %string%, access token %string%( and|,) secret token %string%");
+		Skript.registerEffect(EffTwitterConnect.class, "twitter connect with consumer key %string% and consumer secret %string%");
 		Skript.registerEffect(EffTwitterCreateFavorite.class, "favorite %tweet%");
 		Skript.registerEffect(EffTwitterDeleteDirectMessage.class, "delete (direct message|dm) with id %long%");
 		Skript.registerEffect(EffTwitterCreateFavorite.class, "unfavorite %tweet%");
@@ -121,7 +136,267 @@ public class WolvSKTwitter {
 		Skript.registerExpression(ExprTwitterUserStatusCount.class, Integer.class, ExpressionType.PROPERTY, "status count of %twitterer%");
 		Skript.registerExpression(ExprTwitterUserTimeline.class, Status.class, ExpressionType.PROPERTY, "timeline of %twitterer%");
 		Skript.registerExpression(ExprTwitterOutgoingFriendships.class, Long.class, ExpressionType.PROPERTY, "outgoing friendship[s]");
-		Skript.registerExpression(ExprTwitterStatusID.class, Long.class, ExpressionType.PROPERTY, "id of %tweet%");
-		Skript.registerExpression(ExprTwitterSelfUser.class, User.class, ExpressionType.PROPERTY, "my twitter account");
+		Skript.registerEvent("Direct Message Event", SimpleEvent.class, EvtOnDirectMessage.class, "twitter[ direct] message");
+		EventValues.registerEventValue(EvtOnDirectMessage.class, String.class, new Getter<String, EvtOnDirectMessage>() {
+			public String get(EvtOnDirectMessage e) {
+				return e.getDirectMessage();
+			}
+		}, 0);
+		Skript.registerEvent("Twitter Favorite Event", SimpleEvent.class, EvtOnFavorite.class, "tweet favorite[d]");
+		EventValues.registerEventValue(EvtOnFavorite.class, Status.class, new Getter<Status, EvtOnFavorite>() {
+			public Status get(EvtOnFavorite e) {
+				return e.getStatus();
+			}
+		}, 0);
+		EventValues.registerEventValue(EvtOnFavorite.class, User.class, new Getter<User, EvtOnFavorite>() {
+			public User get(EvtOnFavorite e) {
+				return e.getSource();
+			}
+		}, 0);	
+		Skript.registerEvent("Twitter Unfavorite Event", SimpleEvent.class, EvtOnUnfavorite.class, "tweet unfavorite[d]");
+		EventValues.registerEventValue(EvtOnUnfavorite.class, Status.class, new Getter<Status, EvtOnUnfavorite>() {
+			public Status get(EvtOnUnfavorite e) {
+				return e.getStatus();
+			}
+		}, 0);
+		EventValues.registerEventValue(EvtOnUnfavorite.class, User.class, new Getter<User, EvtOnUnfavorite>() {
+			public User get(EvtOnUnfavorite e) {
+				return e.getSource();
+			}
+		}, 0);
+		Skript.registerEvent("Twitter Favorite Retweet Event", SimpleEvent.class, EvtOnFavoriteRetweet.class, "retweet favorite[d]");
+		EventValues.registerEventValue(EvtOnFavoriteRetweet.class, Status.class, new Getter<Status, EvtOnFavoriteRetweet>() {
+			public Status get(EvtOnFavoriteRetweet e) {
+				return e.getStatus();
+			}
+		}, 0);
+		EventValues.registerEventValue(EvtOnFavoriteRetweet.class, User.class, new Getter<User, EvtOnFavoriteRetweet>() {
+			public User get(EvtOnFavoriteRetweet e) {
+				return e.getSource();
+			}
+		}, 0);
+		Skript.registerEvent("Twitter Follow Event", SimpleEvent.class, EvtOnFollow.class, "follow");
+		EventValues.registerEventValue(EvtOnFollow.class, User.class, new Getter<User, EvtOnFollow>() {
+			public User get(EvtOnFollow e) {
+				return e.getSource();
+			}
+		}, 0);
+		Skript.registerEvent("Twitter Unfollow Event", SimpleEvent.class, EvtOnUnfollow.class, "unfollow");
+		EventValues.registerEventValue(EvtOnUnfollow.class, User.class, new Getter<User, EvtOnUnfollow>() {
+			public User get(EvtOnUnfollow e) {
+				return e.getSource();
+			}
+		}, 0);
+		Skript.registerEvent("Twitter Quoted Status Event", SimpleEvent.class, EvtOnQuotedTweet.class, "tweet quote[d]");
+		EventValues.registerEventValue(EvtOnQuotedTweet.class, Status.class, new Getter<Status, EvtOnQuotedTweet>() {
+			public Status get(EvtOnQuotedTweet e) {
+				return e.getStatus();
+			}
+		}, 0);
+		EventValues.registerEventValue(EvtOnQuotedTweet.class, User.class, new Getter<User, EvtOnQuotedTweet>() {
+			public User get(EvtOnQuotedTweet e) {
+				return e.getSource();
+			}
+		}, 0);
+		Skript.registerEvent("Twitter Receive Tweet Event", SimpleEvent.class, EvtOnReceiveStatus.class, "receive tweet");
+		EventValues.registerEventValue(EvtOnReceiveStatus.class, Status.class, new Getter<Status, EvtOnReceiveStatus>() {
+			public Status get(EvtOnReceiveStatus e) {
+				return e.getStatus();
+			}
+		}, 0);
+		Skript.registerEvent("Twitter Retweeted Retweet Event", SimpleEvent.class, EvtOnRetweetedRetweet.class, "retweet retweet[ed[ tweet]]");
+		EventValues.registerEventValue(EvtOnRetweetedRetweet.class, Status.class, new Getter<Status, EvtOnRetweetedRetweet>() {
+			public Status get(EvtOnRetweetedRetweet e) {
+				return e.getStatus();
+			}
+		}, 0);
+		EventValues.registerEventValue(EvtOnRetweetedRetweet.class, User.class, new Getter<User, EvtOnRetweetedRetweet>() {
+			public User get(EvtOnRetweetedRetweet e) {
+				return e.getSource();
+			}
+		}, 0);
+	}
+	
+	public static void registerEvents(boolean debug, String key, String secret) {
+		 StatusListener listener = new StatusListener(){
+			 @Override
+			 public void onStatus(Status status) {
+				WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnReceiveStatus(status));
+			 }
+
+			@Override
+			public void onException(Exception arg0) {
+			}
+			@Override
+			public void onDeletionNotice(StatusDeletionNotice arg0) {
+			}
+			@Override
+			public void onScrubGeo(long arg0, long arg1) {
+			}
+			@Override
+			public void onStallWarning(StallWarning arg0) {
+			}
+			@Override
+			public void onTrackLimitationNotice(int arg0) {	
+			}
+		 };
+		 TwitterStream ts = new TwitterStreamFactory().getInstance();
+		 ts.setOAuthConsumer(key, secret);
+		 try {
+			ts.setOAuthAccessToken(WolvSKTwitter.tf.getInstance().getOAuthAccessToken());
+		} catch (TwitterException e) {
+			e.printStackTrace();
+		}
+		 ts.addListener(listener);
+		 UserStreamListener userStreamListener = new UserStreamListener() {
+
+			@Override
+			public void onDeletionNotice(StatusDeletionNotice arg0) {
+			}
+			@Override
+			public void onScrubGeo(long arg0, long arg1) {
+			}
+			@Override
+			public void onStallWarning(StallWarning arg0) {
+			}
+			@Override
+			public void onStatus(Status arg0) {
+			}
+			@Override
+			public void onTrackLimitationNotice(int arg0) {
+			}
+			@Override
+			public void onException(Exception arg0) {
+			}
+			@Override
+			public void onBlock(User arg0, User arg1) {
+			}
+			@Override
+			public void onDeletionNotice(long arg0, long arg1) {
+			}
+
+			@Override
+			public void onDirectMessage(DirectMessage arg0) {
+				WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnDirectMessage(arg0));
+			}
+
+			@Override
+			public void onFavorite(User arg0, User arg1, Status arg2) {
+				try {
+					if(arg1.getScreenName().equals(WolvSKTwitter.tf.getInstance().getAccountSettings().getScreenName())) {
+						WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnFavorite(arg0, arg1, arg2));
+					}
+				} catch (IllegalStateException | TwitterException e) {
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			public void onFavoritedRetweet(User arg0, User arg1, Status arg2) {
+				try {
+					if(arg1.getScreenName().equals(WolvSKTwitter.tf.getInstance().getAccountSettings().getScreenName())) {
+						WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnFavoriteRetweet(arg0, arg1, arg2));
+					}
+				} catch (IllegalStateException | TwitterException e) {
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			public void onFollow(User arg0, User arg1) {
+				try {
+					if(arg1.getScreenName().equals(WolvSKTwitter.tf.getInstance().getAccountSettings().getScreenName())) {
+						WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnFollow(arg0));
+					}
+				} catch (IllegalStateException | TwitterException e) {
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			public void onFriendList(long[] arg0) {
+			}
+
+			@Override
+			public void onQuotedTweet(User arg0, User arg1, Status arg2) {
+				try {
+					if(arg1.getScreenName().equals(WolvSKTwitter.tf.getInstance().getAccountSettings().getScreenName())) {
+						WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnQuotedTweet(arg0, arg1, arg2));
+					}
+				} catch (IllegalStateException | TwitterException e) {
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			public void onRetweetedRetweet(User arg0, User arg1, Status arg2) {
+				try {
+					if(arg1.getScreenName().equals(WolvSKTwitter.tf.getInstance().getAccountSettings().getScreenName())) {
+						WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnRetweetedRetweet(arg0, arg1, arg2));
+					}
+				} catch (IllegalStateException | TwitterException e) {
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			public void onUnblock(User arg0, User arg1) {
+			}
+
+			@Override
+			public void onUnfavorite(User arg0, User arg1, Status arg2) {
+				try {
+					if(arg1.getScreenName().equals(WolvSKTwitter.tf.getInstance().getAccountSettings().getScreenName())) {
+						WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnUnfavorite(arg0, arg1, arg2));
+					}
+				} catch (IllegalStateException | TwitterException e) {
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			public void onUnfollow(User arg0, User arg1) {
+				try {
+					if(arg1.getScreenName().equals(WolvSKTwitter.tf.getInstance().getAccountSettings().getScreenName())) {
+						WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnUnfollow(arg0));
+					}
+				} catch (IllegalStateException | TwitterException e) {
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			public void onUserDeletion(long arg0) {
+			}
+			@Override
+			public void onUserListCreation(User arg0, UserList arg1) {
+			}
+			@Override
+			public void onUserListDeletion(User arg0, UserList arg1) {
+			}
+			@Override
+			public void onUserListMemberAddition(User arg0, User arg1, UserList arg2) {
+			}
+			@Override
+			public void onUserListMemberDeletion(User arg0, User arg1, UserList arg2) {
+			}
+			@Override
+			public void onUserListSubscription(User arg0, User arg1, UserList arg2) {
+			}
+			@Override
+			public void onUserListUnsubscription(User arg0, User arg1, UserList arg2) {
+			}
+			@Override
+			public void onUserListUpdate(User arg0, UserList arg1) {
+			}
+			@Override
+			public void onUserProfileUpdate(User arg0) {
+			}
+			@Override
+			public void onUserSuspension(long arg0) {
+			}				
+		 };
+		 ts.addListener(userStreamListener);
+		 twitterStream = ts;
 	}
 }
