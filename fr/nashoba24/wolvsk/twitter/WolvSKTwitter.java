@@ -91,7 +91,7 @@ public class WolvSKTwitter {
 		Skript.registerEffect(EffPostTweet.class, "tweet %string%");
 		Skript.registerEffect(EffRemoveTweet.class, "destroy %tweet%");
 		Skript.registerEffect(EffTwitterBlockUser.class, "block %twitterer%");
-		Skript.registerEffect(EffTwitterConnect.class, "twitter connect with consumer key %string% and consumer secret %string%");
+		Skript.registerEffect(EffTwitterConnect.class, "twitter connect with consumer key %string%, consumer secret %string%, access token %string%( and|,) secret token %string%", "twitter debug connect with consumer key %string%, consumer secret %string%, access token %string%( and|,) secret token %string%");
 		Skript.registerEffect(EffTwitterCreateFavorite.class, "favorite %tweet%");
 		Skript.registerEffect(EffTwitterDeleteDirectMessage.class, "delete (direct message|dm) with id %long%");
 		Skript.registerEffect(EffTwitterCreateFavorite.class, "unfavorite %tweet%");
@@ -137,6 +137,8 @@ public class WolvSKTwitter {
 		Skript.registerExpression(ExprTwitterUserTimeline.class, Status.class, ExpressionType.PROPERTY, "timeline of %twitterer%");
 		Skript.registerExpression(ExprTwitterOutgoingFriendships.class, Long.class, ExpressionType.PROPERTY, "outgoing friendship[s]");
 		Skript.registerEvent("Direct Message Event", SimpleEvent.class, EvtOnDirectMessage.class, "twitter[ direct] message");
+		Skript.registerExpression(ExprTwitterStatusID.class, Long.class, ExpressionType.PROPERTY, "id of %tweet%");		 +		Skript.registerEvent("Direct Message Event", SimpleEvent.class, EvtOnDirectMessage.class, "twitter[ direct] message");
+		Skript.registerExpression(ExprTwitterSelfUser.class, User.class, ExpressionType.PROPERTY, "my twitter account");
 		EventValues.registerEventValue(EvtOnDirectMessage.class, String.class, new Getter<String, EvtOnDirectMessage>() {
 			public String get(EvtOnDirectMessage e) {
 				return e.getDirectMessage();
