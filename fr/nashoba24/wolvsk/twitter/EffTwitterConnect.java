@@ -60,6 +60,6 @@ public class EffTwitterConnect extends Effect {
 			WolvSKTwitter.tf = null;
 			return;
 		}
-		WolvSKTwitter.registerEvents(debug, consumer_key.getSingle(e), consumer_secret.getSingle(e));
+		WolvSKTwitter.registerEvents(debug, consumer_key.getSingle(e), consumer_secret.getSingle(e), access_token.getSingle(e), access_token_secret.getSingle(e));
 	}
 }

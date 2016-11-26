@@ -16,14 +16,13 @@ import twitter4j.DirectMessage;
 import twitter4j.StallWarning;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
-import twitter4j.StatusListener;
-import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.TwitterStream;
 import twitter4j.TwitterStreamFactory;
 import twitter4j.User;
 import twitter4j.UserList;
 import twitter4j.UserStreamListener;
+import twitter4j.conf.ConfigurationBuilder;
 
 public class WolvSKTwitter {
 
@@ -137,7 +136,8 @@ public class WolvSKTwitter {
 		Skript.registerExpression(ExprTwitterUserTimeline.class, Status.class, ExpressionType.PROPERTY, "timeline of %twitterer%");
 		Skript.registerExpression(ExprTwitterOutgoingFriendships.class, Long.class, ExpressionType.PROPERTY, "outgoing friendship[s]");
 		Skript.registerEvent("Direct Message Event", SimpleEvent.class, EvtOnDirectMessage.class, "twitter[ direct] message");
-		Skript.registerExpression(ExprTwitterStatusID.class, Long.class, ExpressionType.PROPERTY, "id of %tweet%");		 +		Skript.registerEvent("Direct Message Event", SimpleEvent.class, EvtOnDirectMessage.class, "twitter[ direct] message");
+		Skript.registerExpression(ExprTwitterStatusID.class, Long.class, ExpressionType.PROPERTY, "id of %tweet%");
+		Skript.registerEvent("Direct Message Event", SimpleEvent.class, EvtOnDirectMessage.class, "twitter[ direct] message");
 		Skript.registerExpression(ExprTwitterSelfUser.class, User.class, ExpressionType.PROPERTY, "my twitter account");
 		EventValues.registerEventValue(EvtOnDirectMessage.class, String.class, new Getter<String, EvtOnDirectMessage>() {
 			public String get(EvtOnDirectMessage e) {
@@ -183,12 +183,12 @@ public class WolvSKTwitter {
 				return e.getSource();
 			}
 		}, 0);
-		Skript.registerEvent("Twitter Unfollow Event", SimpleEvent.class, EvtOnUnfollow.class, "unfollow");
+		/*Skript.registerEvent("Twitter Unfollow Event", SimpleEvent.class, EvtOnUnfollow.class, "unfollow");
 		EventValues.registerEventValue(EvtOnUnfollow.class, User.class, new Getter<User, EvtOnUnfollow>() {
 			public User get(EvtOnUnfollow e) {
 				return e.getSource();
 			}
-		}, 0);
+		}, 0);*/
 		Skript.registerEvent("Twitter Quoted Status Event", SimpleEvent.class, EvtOnQuotedTweet.class, "tweet quote[d]");
 		EventValues.registerEventValue(EvtOnQuotedTweet.class, Status.class, new Getter<Status, EvtOnQuotedTweet>() {
 			public Status get(EvtOnQuotedTweet e) {
@@ -219,37 +219,14 @@ public class WolvSKTwitter {
 		}, 0);
 	}
 	
-	public static void registerEvents(boolean debug, String key, String secret) {
-		 StatusListener listener = new StatusListener(){
-			 @Override
-			 public void onStatus(Status status) {
-				WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnReceiveStatus(status));
-			 }
-
-			@Override
-			public void onException(Exception arg0) {
-			}
-			@Override
-			public void onDeletionNotice(StatusDeletionNotice arg0) {
-			}
-			@Override
-			public void onScrubGeo(long arg0, long arg1) {
-			}
-			@Override
-			public void onStallWarning(StallWarning arg0) {
-			}
-			@Override
-			public void onTrackLimitationNotice(int arg0) {	
-			}
-		 };
-		 TwitterStream ts = new TwitterStreamFactory().getInstance();
-		 ts.setOAuthConsumer(key, secret);
-		 try {
-			ts.setOAuthAccessToken(WolvSKTwitter.tf.getInstance().getOAuthAccessToken());
-		} catch (TwitterException e) {
-			e.printStackTrace();
-		}
-		 ts.addListener(listener);
+	public static void registerEvents(boolean debug, String key, String secret, String access_token, String access_token_secret) {
+		ConfigurationBuilder cb = new ConfigurationBuilder();
+		cb.setDebugEnabled(debug)
+		  .setOAuthConsumerKey(key)
+		  .setOAuthConsumerSecret(secret)
+		  .setOAuthAccessToken(access_token)
+		  .setOAuthAccessTokenSecret(access_token_secret);
+		 TwitterStream ts = new TwitterStreamFactory(cb.build()).getInstance();
 		 UserStreamListener userStreamListener = new UserStreamListener() {
 
 			@Override
@@ -263,6 +240,7 @@ public class WolvSKTwitter {
 			}
 			@Override
 			public void onStatus(Status arg0) {
+				WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnReceiveStatus(arg0));
 			}
 			@Override
 			public void onTrackLimitationNotice(int arg0) {
@@ -285,10 +263,8 @@ public class WolvSKTwitter {
 			@Override
 			public void onFavorite(User arg0, User arg1, Status arg2) {
 				try {
-					if(arg1.getScreenName().equals(WolvSKTwitter.tf.getInstance().getAccountSettings().getScreenName())) {
-						WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnFavorite(arg0, arg1, arg2));
-					}
-				} catch (IllegalStateException | TwitterException e) {
+					WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnFavorite(arg0, arg1, arg2));
+				} catch (IllegalStateException e) {
 					e.printStackTrace();
 				}
 			}
@@ -296,10 +272,8 @@ public class WolvSKTwitter {
 			@Override
 			public void onFavoritedRetweet(User arg0, User arg1, Status arg2) {
 				try {
-					if(arg1.getScreenName().equals(WolvSKTwitter.tf.getInstance().getAccountSettings().getScreenName())) {
-						WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnFavoriteRetweet(arg0, arg1, arg2));
-					}
-				} catch (IllegalStateException | TwitterException e) {
+					WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnFavoriteRetweet(arg0, arg1, arg2));
+				} catch (IllegalStateException e) {
 					e.printStackTrace();
 				}
 			}
@@ -307,10 +281,8 @@ public class WolvSKTwitter {
 			@Override
 			public void onFollow(User arg0, User arg1) {
 				try {
-					if(arg1.getScreenName().equals(WolvSKTwitter.tf.getInstance().getAccountSettings().getScreenName())) {
-						WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnFollow(arg0));
-					}
-				} catch (IllegalStateException | TwitterException e) {
+					WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnFollow(arg0));
+				} catch (IllegalStateException e) {
 					e.printStackTrace();
 				}
 			}
@@ -322,10 +294,8 @@ public class WolvSKTwitter {
 			@Override
 			public void onQuotedTweet(User arg0, User arg1, Status arg2) {
 				try {
-					if(arg1.getScreenName().equals(WolvSKTwitter.tf.getInstance().getAccountSettings().getScreenName())) {
-						WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnQuotedTweet(arg0, arg1, arg2));
-					}
-				} catch (IllegalStateException | TwitterException e) {
+					WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnQuotedTweet(arg0, arg1, arg2));
+				} catch (IllegalStateException e) {
 					e.printStackTrace();
 				}
 			}
@@ -333,10 +303,8 @@ public class WolvSKTwitter {
 			@Override
 			public void onRetweetedRetweet(User arg0, User arg1, Status arg2) {
 				try {
-					if(arg1.getScreenName().equals(WolvSKTwitter.tf.getInstance().getAccountSettings().getScreenName())) {
-						WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnRetweetedRetweet(arg0, arg1, arg2));
-					}
-				} catch (IllegalStateException | TwitterException e) {
+					WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnRetweetedRetweet(arg0, arg1, arg2));
+				} catch (IllegalStateException e) {
 					e.printStackTrace();
 				}
 			}
@@ -348,10 +316,8 @@ public class WolvSKTwitter {
 			@Override
 			public void onUnfavorite(User arg0, User arg1, Status arg2) {
 				try {
-					if(arg1.getScreenName().equals(WolvSKTwitter.tf.getInstance().getAccountSettings().getScreenName())) {
-						WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnUnfavorite(arg0, arg1, arg2));
-					}
-				} catch (IllegalStateException | TwitterException e) {
+					WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnUnfavorite(arg0, arg1, arg2));
+				} catch (IllegalStateException e) {
 					e.printStackTrace();
 				}
 			}
@@ -359,10 +325,8 @@ public class WolvSKTwitter {
 			@Override
 			public void onUnfollow(User arg0, User arg1) {
 				try {
-					if(arg1.getScreenName().equals(WolvSKTwitter.tf.getInstance().getAccountSettings().getScreenName())) {
-						WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnUnfollow(arg0));
-					}
-				} catch (IllegalStateException | TwitterException e) {
+					WolvSK.getInstance().getServer().getPluginManager().callEvent(new EvtOnUnfollow(arg0));
+				} catch (IllegalStateException e) {
 					e.printStackTrace();
 				}
 			}
@@ -399,6 +363,7 @@ public class WolvSKTwitter {
 			}				
 		 };
 		 ts.addListener(userStreamListener);
+		 ts.user();
 		 twitterStream = ts;
 	}
 }
