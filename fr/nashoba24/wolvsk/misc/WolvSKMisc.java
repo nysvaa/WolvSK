@@ -48,6 +48,14 @@ public class WolvSKMisc implements Listener {
 		   			Skript.registerEffect(EffSpectate1_8_R1.class, "wolvsk make %player% spectate %entity%");
 		   			Skript.registerEffect(EffUnspectate1_8_R1.class, "wolvsk make %player% stop spectating");
 		   			break;
+		   		case "v1_8_R2":
+		   			Skript.registerEffect(EffSpectate1_8_R2.class, "wolvsk make %player% spectate %entity%");
+		   			Skript.registerEffect(EffUnspectate1_8_R2.class, "wolvsk make %player% stop spectating");
+		   			break;
+		   		case "v1_8_R3":
+		   			Skript.registerEffect(EffSpectate1_8_R3.class, "wolvsk make %player% spectate %entity%");
+		   			Skript.registerEffect(EffUnspectate1_8_R3.class, "wolvsk make %player% stop spectating");
+		   			break;
 		   		case "v1_9_R1":
 		   			Skript.registerEffect(EffSpectate1_9_R1.class, "wolvsk make %player% spectate %entity%");
 		   			Skript.registerEffect(EffUnspectate1_9_R1.class, "wolvsk make %player% stop spectating");

@@ -6,12 +6,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+
 import com.github.theholywaffle.teamspeak3.TS3Api;
 import com.github.theholywaffle.teamspeak3.TS3Query;
+
 import ch.njol.skript.Skript;
 import fr.nashoba24.wolvsk.askyblock.WolvSKASkyBlock;
 import fr.nashoba24.wolvsk.essentials.WolvSKEssentials;
 import fr.nashoba24.wolvsk.guardianbeamapi.WolvSKGuardianBeamAPI;
+import fr.nashoba24.wolvsk.maths.WolvSKMaths;
 import fr.nashoba24.wolvsk.minigames.Minigames;
 import fr.nashoba24.wolvsk.misc.ExprNameOfBlock;
 import fr.nashoba24.wolvsk.misc.WolvSKMisc;
@@ -61,6 +64,7 @@ public class WolvSK extends JavaPlugin implements Listener {
 		   WolvSKWolvMC.registerAll();
 		   WolvSKPlayerPoints.registerAll();
 		   WolvSKTwitter.registerAll();
+		   WolvSKMaths.registerAll();
 		   Bukkit.getLogger().info(ChatColor.translateAlternateColorCodes('&', "&aWolvSK Enabled!"));
 	  }
 
