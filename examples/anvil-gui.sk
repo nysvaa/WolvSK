@@ -1,0 +1,6 @@
+command /test:
+	trigger:
+		open an anvil gui named "Test" to player with default text "Write what you want!"
+		
+on close anvil gui named "Test":
+	broadcast "%player% wrote %event-text%!"
