@@ -16,7 +16,6 @@ import fr.nashoba24.wolvsk.essentials.WolvSKEssentials;
 import fr.nashoba24.wolvsk.guardianbeamapi.WolvSKGuardianBeamAPI;
 import fr.nashoba24.wolvsk.maths.WolvSKMaths;
 import fr.nashoba24.wolvsk.minigames.Minigames;
-import fr.nashoba24.wolvsk.misc.ExprNameOfBlock;
 import fr.nashoba24.wolvsk.misc.WolvSKMisc;
 import fr.nashoba24.wolvsk.playerpoints.WolvSKPlayerPoints;
 import fr.nashoba24.wolvsk.pvparena.WolvSKPvpArena;
@@ -43,7 +42,6 @@ public class WolvSK extends JavaPlugin implements Listener {
 	  public void onEnable()
 	  {
 		   instance = this;
-		   Bukkit.getPluginManager().registerEvents(new ExprNameOfBlock(), this);
 		   if(Bukkit.getServer().getPluginManager().getPlugin("ProtocolLib") != null) {
 			   Bukkit.getPluginManager().registerEvents(new Minigames(), this);
 			   getCommand("minigames").setExecutor(new Minigames());

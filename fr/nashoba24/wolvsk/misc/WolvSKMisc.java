@@ -9,6 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.scheduler.BukkitScheduler;
 
 import ch.njol.skript.Skript;
@@ -18,6 +19,23 @@ import ch.njol.skript.registrations.EventValues;
 import ch.njol.skript.util.Getter;
 import ch.njol.skript.util.Timespan;
 import fr.nashoba24.wolvsk.WolvSK;
+import fr.nashoba24.wolvsk.misc.anvilgui.CloseAnvilGUIEvent;
+import fr.nashoba24.wolvsk.misc.anvilgui.EffOpenAnvilGUI;
+import fr.nashoba24.wolvsk.misc.anvilgui.EvtCloseAnvilGUI;
+import fr.nashoba24.wolvsk.misc.spectate.EffSpectate1_10_R1;
+import fr.nashoba24.wolvsk.misc.spectate.EffSpectate1_11_R1;
+import fr.nashoba24.wolvsk.misc.spectate.EffSpectate1_8_R1;
+import fr.nashoba24.wolvsk.misc.spectate.EffSpectate1_8_R2;
+import fr.nashoba24.wolvsk.misc.spectate.EffSpectate1_8_R3;
+import fr.nashoba24.wolvsk.misc.spectate.EffSpectate1_9_R1;
+import fr.nashoba24.wolvsk.misc.spectate.EffSpectate1_9_R2;
+import fr.nashoba24.wolvsk.misc.spectate.EffUnspectate1_10_R1;
+import fr.nashoba24.wolvsk.misc.spectate.EffUnspectate1_11_R1;
+import fr.nashoba24.wolvsk.misc.spectate.EffUnspectate1_8_R1;
+import fr.nashoba24.wolvsk.misc.spectate.EffUnspectate1_8_R2;
+import fr.nashoba24.wolvsk.misc.spectate.EffUnspectate1_8_R3;
+import fr.nashoba24.wolvsk.misc.spectate.EffUnspectate1_9_R1;
+import fr.nashoba24.wolvsk.misc.spectate.EffUnspectate1_9_R2;
 
 public class WolvSKMisc implements Listener {
 	
@@ -25,7 +43,6 @@ public class WolvSKMisc implements Listener {
 	public static String[] insults = new String[]{"srx", "ptn", "fdp", "ntm", "wtf", "pd"};
 
 	public static void registerAll() {
-		   Skript.registerExpression(ExprNameOfBlock.class, String.class, ExpressionType.PROPERTY, "name of %block%", "%block%['s] name");
 		   Skript.registerExpression(ExprBlockPower.class, Integer.class, ExpressionType.PROPERTY, "power of %block%", "%block%['s] power");
 		   Skript.registerCondition(CondOdd.class, "%number% is odd");
 		   Skript.registerCondition(CondEven.class, "%number% is even");
@@ -42,6 +59,23 @@ public class WolvSKMisc implements Listener {
 		   Skript.registerEffect(EffCallMethodWithParams.class, "call (function|method) %string% with param[meter][s] %objects% in class[ named] %string%");
 		   Skript.registerEffect(EffCallMethodWithoutParams.class, "call (function|method) %string% [without param[meter][s]] in class[ named] %string%");
 		   Skript.registerEvent("Rage Event", SimpleEvent.class, PlayerRageEvent.class, "[player ]rage");
+		   Skript.registerEffect(EffOpenAnvilGUI.class, "open[ a[n]] anvil gui name[d] %string% to %player%", "open[ a[n]] anvil gui name[d] %string% to %player% with[ default] text %string%");
+		   Skript.registerEvent("Anvil GUI", EvtCloseAnvilGUI.class, CloseAnvilGUIEvent.class, "(close|confirm|done)[ a[n]] anvil gui name[d] %string%");
+		   EventValues.registerEventValue(CloseAnvilGUIEvent.class, Player.class, new Getter<Player, CloseAnvilGUIEvent>() {
+			   public Player get(CloseAnvilGUIEvent e) {
+				   return e.getPlayer();
+			   }
+		   }, 0);
+		   EventValues.registerEventValue(CloseAnvilGUIEvent.class, String.class, new Getter<String, CloseAnvilGUIEvent>() {
+			   public String get(CloseAnvilGUIEvent e) {
+				   return e.getInputText();
+			   }
+		   }, 0);
+		   EventValues.registerEventValue(CloseAnvilGUIEvent.class, Inventory.class, new Getter<Inventory, CloseAnvilGUIEvent>() {
+			   public Inventory get(CloseAnvilGUIEvent e) {
+				   return e.getInventory();
+			   }
+		   }, 0);
 		   String version = WolvSK.getInstance().getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
 		   switch(version) {
 		   		case "v1_8_R1":
@@ -80,6 +114,8 @@ public class WolvSKMisc implements Listener {
 		   }, 0);
 		   if(Bukkit.getServer().getPluginManager().getPlugin("ProtocolLib") != null) {
 			   WolvSKSteer.registerSteer();
+			   ExprClientVersion.registerClientVersion();
+			   Skript.registerExpression(ExprClientVersion.class, Integer.class, ExpressionType.PROPERTY, "(minecraft|mc) version of %player%");
 			   Skript.registerEvent("Vehicle Steer Left", SimpleEvent.class, SteerLeftEvent.class, "vehicle steer left");
 			   EventValues.registerEventValue(SteerLeftEvent.class, Player.class, new Getter<Player, SteerLeftEvent>() {
 				   public Player get(SteerLeftEvent e) {
