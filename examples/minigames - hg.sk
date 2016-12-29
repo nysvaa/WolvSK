@@ -53,15 +53,15 @@ command /hungergames [<text>] [<text>]:
 				send "&6/hungergames &aaddchest <arene>"
 on arena start:
 	clear {hg.%name of event-arena%}
-	if name of event-minigame is "hungergames":
-		loop {hg.chests.%name of event-arena%::*}:
+	if name of minigame event-minigame is "hungergames":
+		loop {hg.chests.%name of arena event-arena%::*}:
 			clear inventory of block at loop-value
 			loop random number between 1 and 10 times:
 				set {_i} to random element out of {hg.items::*}
 				add {_i} to block at loop-value-1
 		loop all players in event-arena:
 			add 1 to {_i}
-			teleport loop-player to {hg.spawns.%name of event-arena%::%{_i}%}
+			teleport loop-player to {hg.spawns.%name of arena event-arena%::%{_i}%}
 		set {_i} to 10
 		loop 10 times:
 			if event-arena is started:
@@ -71,20 +71,20 @@ on arena start:
 				stop
 			remove 1 from {_i}
 		broadcast "&6GO!" in event-arena
-		set {hg.%name of event-arena%} to true
+		set {hg.%name of arena event-arena%} to true
 on any movement:
-	if name of minigame of player is "hungergames":
-		if {hg.%name of arena of player%} is not set:
+	if name of minigame minigame of player is "hungergames":
+		if {hg.%name of arena arena of player%} is not set:
 			if arena of player is started:
 				cancel event
 on death of player:
-	if name of minigame of player is "hungergames":
+	if name of minigame minigame of player is "hungergames":
 		strike lightning at player
 		make player leave current arena
 		send "&cVous avez perdu!" to player
 on break:
-	if name of minigame of player is "hungergames":
+	if name of minigame minigame of player is "hungergames":
 		cancel event
 on place:
-	if name of minigame of player is "hungergames":
+	if name of minigame minigame of player is "hungergames":
 		cancel event
