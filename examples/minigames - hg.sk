@@ -52,7 +52,7 @@ command /hungergames [<text>] [<text>]:
 			else:
 				send "&6/hungergames &aaddchest <arene>"
 on arena start:
-	clear {hg.%name of event-arena%}
+	clear {hg.%name of arena event-arena%}
 	if name of minigame event-minigame is "hungergames":
 		loop {hg.chests.%name of arena event-arena%::*}:
 			clear inventory of block at loop-value
