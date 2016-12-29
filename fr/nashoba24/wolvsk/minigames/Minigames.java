@@ -56,8 +56,8 @@ public class Minigames implements Listener, CommandExecutor {
 	
 	static ArrayList<Minigame> arr = new ArrayList<Minigame>();
 	static HashMap<String, Minigame> map = new HashMap<String, Minigame>();
-	static HashMap<Player, Minigame> games = new HashMap<Player, Minigame>();
 	static HashMap<String, Minigame> commands = new HashMap<String, Minigame>();
+	static HashMap<String, Minigame> games = new HashMap<String, Minigame>();
 	static HashMap<String, Integer> lvl = new HashMap<String, Integer>();
 	static HashMap<String, Float> exp = new HashMap<String, Float>();
 	static HashMap<String, ItemStack[]> inv = new HashMap<String, ItemStack[]>();
@@ -65,6 +65,10 @@ public class Minigames implements Listener, CommandExecutor {
 	public static String chatFormat = "%player% > %message%";
 	public static String messageFormat = "&6[%minigame%] &r&b%message%";
 	static boolean init = false;
+	public static String xSecsLeft = "The game will start in %secs% seconds!";
+	public static String OneSecLeft = "The game will start in 1 second!";
+	public static String playerJoined = "%player% joined the game!";
+	public static String playerLeft = "%player% left the game!";
 	
 	public static Minigame createMinigame(String name, String command, String prefix, boolean save) {
 		name = name.replaceAll(" ", "-");
@@ -226,7 +230,7 @@ public class Minigames implements Listener, CommandExecutor {
 				}
 				mg.setArena(p, arena);
 				arena.addPlayer(p);
-				games.put(p, mg);
+				games.put(p.getName(), mg);
 				lvl.put(p.getName(), p.getLevel());
 				exp.put(p.getName(), p.getExp());
 				inv.put(p.getName(), p.getInventory().getContents());
@@ -266,7 +270,7 @@ public class Minigames implements Listener, CommandExecutor {
 					WolvSK.getInstance().getServer().getPluginManager().callEvent(new PlayerLeaveArenaEvent(Minigames.getMinigame(p), Minigames.getMinigame(p).getArena(p), p));
 					Minigames.getMinigame(p).getArena(p).removePlayer(p);
 					Minigames.getMinigame(p).setArena(p, null);
-					games.remove(p);
+					games.remove(p.getName());
 					if(lvl.containsKey(p.getName())) {
 						p.setLevel(lvl.get(p.getName()));
 					}
@@ -291,7 +295,10 @@ public class Minigames implements Listener, CommandExecutor {
 				WolvSK.getInstance().getServer().getPluginManager().callEvent(new PlayerLeaveArenaEvent(Minigames.getMinigame(p), Minigames.getMinigame(p).getArena(p), p));
 				Minigames.getMinigame(p).getArena(p).removePlayer(p);
 				Minigames.getMinigame(p).setArena(p, null);
-				games.remove(p);
+				if(msg) {
+					arena.broadcast(Minigames.getMessage(playerLeft.replaceAll("%player%", p.getName()), arena.getMinigame().getPrefix(), false));
+				}
+				games.remove(p.getName());
 				if(lvl.containsKey(p.getName())) {
 					p.setLevel(lvl.get(p.getName()));
 				}
@@ -315,7 +322,7 @@ public class Minigames implements Listener, CommandExecutor {
 	}
 	
 	public static boolean inGame(Player p) {
-		if(games.containsKey(p)) {
+		if(games.containsKey(p.getName())) {
 			return true;
 		}
 		else {
@@ -324,8 +331,8 @@ public class Minigames implements Listener, CommandExecutor {
 	}
 	
 	public static Minigame getMinigame(Player p) {
-		if(games.containsKey(p)) {
-			return games.get(p);
+		if(games.containsKey(p.getName())) {
+			return games.get(p.getName());
 		}
 		else {
 			return null;
@@ -358,7 +365,7 @@ public class Minigames implements Listener, CommandExecutor {
 		if(ancLoc.containsKey(e.getPlayer().getName())) {
 			e.getPlayer().teleport(ancLoc.get(e.getPlayer().getName()));
 		}
-		Minigames.leave(e.getPlayer(), true, false, null);
+		Minigames.leave(e.getPlayer(), true, true, null);
 	}
 	
 	@EventHandler
@@ -504,7 +511,7 @@ public class Minigames implements Listener, CommandExecutor {
 							}
 							boolean success = join(e.getPlayer(), mg, mg.getArena(sign.getLine(1), false), true);
 							if(success) {
-								mg.getArena(sign.getLine(1), false).broadcast(Minigames.getMessage(e.getPlayer().getName() + " joined the game!", mg.getPrefix(), false));
+								mg.getArena(sign.getLine(1), false).broadcast(Minigames.getMessage(playerJoined.replaceAll("%player%", e.getPlayer().getName()), mg.getPrefix(), false));
 							}
 						}
 					}
@@ -580,7 +587,7 @@ public class Minigames implements Listener, CommandExecutor {
 						boolean s = Minigames.leave(p, false, true, mg.getPrefix());
 						if(s) {
 							p.sendMessage(ChatColor.GREEN + "[" + mg.getPrefix() + "] You left the game!");
-							a.broadcast(ChatColor.GOLD + p.getName() + ChatColor.AQUA + " left the game!");
+							a.broadcast(Minigames.getMessage(playerLeft.replaceAll("%player%", e.getPlayer().getName()), mg.getPrefix(), false));
 						}
 					}
 					else {
@@ -747,7 +754,7 @@ public class Minigames implements Listener, CommandExecutor {
 							}
 							boolean success = Minigames.join(p, mg, mg.getArena(args[1], true), true);
 							if(success) {
-								mg.getArena(args[1], true).broadcast(p.getName() + ChatColor.AQUA + " joined the game!");
+								mg.getArena(args[1], true).broadcast(Minigames.getMessage(playerJoined.replaceAll("%player%", e.getPlayer().getName()), mg.getPrefix(), false));
 							}
 						}
 					}
@@ -976,6 +983,10 @@ public class Minigames implements Listener, CommandExecutor {
 										p.sendMessage(ChatColor.RED + "[" + mg.getPrefix() + "] The minimum of player cannot be greater than the maximum of player");
 										return;
 									}
+									if(min<=1) {
+										p.sendMessage(ChatColor.RED + "[" + mg.getPrefix() + "] The minimum of player must be greater than 0!");
+										return;
+									}
 									mg.addArena(new Arena(mg, args[1], min, max), true);
 									p.sendMessage(ChatColor.GREEN + "[" + mg.getPrefix() + "] The arena " + ChatColor.DARK_GREEN + args[1] + ChatColor.GREEN + " has been created!");
 								}
@@ -1089,10 +1100,20 @@ public class Minigames implements Listener, CommandExecutor {
 			if(config.isSet("message-format")) {
 				Minigames.messageFormat = config.getString("message-format");
 			}
-			try {
-				config.save(file);
-			} catch (IOException e) {
-				e.printStackTrace();
+			if(config.isSet("messages")) {
+				ConfigurationSection sect = config.getConfigurationSection("messages");
+				if(sect.isSet("start-in-x-seconds")) {
+					Minigames.xSecsLeft = sect.getString("start-in-x-seconds");
+				}
+				if(sect.isSet("start-in-1-second")) {
+					Minigames.OneSecLeft = sect.getString("start-in-1-second");
+				}
+				if(sect.isSet("player-joined")) {
+					Minigames.playerJoined = sect.getString("player-joined");
+				}
+				if(sect.isSet("player-left")) {
+					Minigames.playerLeft = sect.getString("player-left");
+				}
 			}
 		}
 		else {
@@ -1202,7 +1223,7 @@ public class Minigames implements Listener, CommandExecutor {
 		   Skript.registerExpression(ExprMinigameByName.class, Minigame.class, ExpressionType.PROPERTY, "minigame %string%");
 		   Skript.registerExpression(ExprAllMinigames.class, Minigame.class, ExpressionType.PROPERTY, "[all ]minigames");
 		   Skript.registerExpression(ExprMinigamePlayer.class, Minigame.class, ExpressionType.PROPERTY, "[current ]minigame of %player%", "%player%['s] [current ]minigame");
-		   Skript.registerExpression(ExprNameOfMinigame.class, String.class, ExpressionType.PROPERTY, "name of %minigame%", "%minigame%['s] name");
+		   Skript.registerExpression(ExprNameOfMinigame.class, String.class, ExpressionType.PROPERTY, "name of (minigame|mg) %minigame%", "(minigame|mg) %minigame%['s] name");
 		   Skript.registerExpression(ExprAllArenas.class, Arena.class, ExpressionType.PROPERTY, "[all ]arenas of %minigame%", "%minigame%['s] arenas");
 		   Skript.registerExpression(ExprArenaByName.class, Arena.class, ExpressionType.PROPERTY, "arena %string% in %minigame%", "%minigame%['s] arena %string%");
 		   Skript.registerExpression(ExprArenaOfPlayer.class, Arena.class, ExpressionType.PROPERTY, "[current ]arena of %player%", "%player%['s] [current ]arena");
@@ -1210,7 +1231,7 @@ public class Minigames implements Listener, CommandExecutor {
 		   Skript.registerExpression(ExprMinigamePrefix.class, String.class, ExpressionType.PROPERTY, "prefix of %minigame%", "%minigame%['s] prefix");
 		   Skript.registerExpression(ExprArenaLobby.class, Location.class, ExpressionType.PROPERTY, "lobby of %arena%", "%arena%['s] lobby");
 		   Skript.registerExpression(ExprMinigameOfArena.class, Minigame.class, ExpressionType.PROPERTY, "minigame of %arena%", "%arena%['s] minigame");
-		   Skript.registerExpression(ExprArenaName.class, String.class, ExpressionType.PROPERTY, "name of %arena%", "%arena%['s] name");
+		   Skript.registerExpression(ExprArenaName.class, String.class, ExpressionType.PROPERTY, "name of arena %arena%", "arena %arena%['s] name");
 		   Skript.registerExpression(ExprArenaMax.class, Integer.class, ExpressionType.PROPERTY, "max[imum][ of player[s]] of %arena%", "%arena%['s] max[imum][ of player[s]]");
 		   Skript.registerExpression(ExprArenaMin.class, Integer.class, ExpressionType.PROPERTY, "min[imum][ of player[s]] of %arena%", "%arena%['s] min[imum][ of player[s]]");
 		   Skript.registerExpression(ExprArenaCount.class, Integer.class, ExpressionType.PROPERTY, "([player ]count|number of player[s]) of %arena%", "%arena%['s] ([player ]count|number of player[s])");
@@ -1305,7 +1326,7 @@ public class Minigames implements Listener, CommandExecutor {
 					if(args.length==4) {
 						if(Minigames.getByName(args[1])==null) {
 							if(!commands.containsKey(args[2].toLowerCase())) {
-								Minigames.createMinigame(args[1], args[2].toLowerCase(), args[3], true);
+								Minigames.createMinigame(args[1], args[2].toLowerCase(), args[3].replaceAll("_", " "), true);
 								sender.sendMessage(ChatColor.GREEN + "[Minigames] The Minigame " + ChatColor.DARK_GREEN + args[1] + ChatColor.GREEN + " has been succefully created!");
 							}
 							else {
@@ -1393,6 +1414,11 @@ public class Minigames implements Listener, CommandExecutor {
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		config.set("chat-format", Minigames.chatFormat);
 		config.set("message-format", Minigames.messageFormat);
+		ConfigurationSection sect = config.createSection("messages");
+		sect.set("start-in-x-seconds", Minigames.xSecsLeft);
+		sect.set("start-in-1-second", Minigames.OneSecLeft);
+		sect.set("player-joined", Minigames.playerJoined);
+		sect.set("player-left", Minigames.playerLeft);
 		try {
 			config.save(file);
 		} catch (IOException e) {

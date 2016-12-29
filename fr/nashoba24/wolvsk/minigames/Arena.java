@@ -19,7 +19,7 @@ public class Arena {
 	private Location lobby;
 	private Integer minp;
 	private Integer maxp;
-	private ArrayList<Player> pl = new ArrayList<Player>();
+	private ArrayList<String> pl = new ArrayList<String>();
 	private boolean started = false;
 	private Integer defaultTimer = 120;
 	private Integer timer = 120;
@@ -76,11 +76,11 @@ public class Arena {
 	}
 	
 	public void addPlayer(Player p) {
-		pl.add(p);
+		pl.add(p.getName());
 	}
 	
 	public void removePlayer(Player p) {
-		pl.remove(p);
+		pl.remove(p.getName());
 	}
 	
 	public Integer playersCount() {
@@ -88,7 +88,7 @@ public class Arena {
 	}
 	
 	public boolean isInArena(Player p) {
-		if(pl.contains(p)) {
+		if(pl.contains(p.getName())) {
 			return true;
 		}
 		else {
@@ -142,46 +142,46 @@ public class Arena {
 			if(timer!=defaultTimer) {
 				if(timer>=30) {
 					if(timer % 30 == 0) {
-						this.broadcast(Minigames.getMessage(timer + " seconds left before starting!", this.getMinigame().getPrefix(), false));
+						this.broadcast(Minigames.getMessage(Minigames.xSecsLeft.replaceAll("%secs%", timer.toString()), this.getMinigame().getPrefix(), false));
 					}
 				}
 				else {
 					if(timer==20) {
-						this.broadcast(Minigames.getMessage(timer + " seconds left before starting!", this.getMinigame().getPrefix(), false));
+						this.broadcast(Minigames.getMessage(Minigames.xSecsLeft.replaceAll("%secs%", timer.toString()), this.getMinigame().getPrefix(), false));
 					}
 					else if(timer==10) {
-						this.broadcast(Minigames.getMessage(timer + " seconds left before starting!", this.getMinigame().getPrefix(), false));
+						this.broadcast(Minigames.getMessage(Minigames.xSecsLeft.replaceAll("%secs%", timer.toString()), this.getMinigame().getPrefix(), false));
 					}
 					else if(timer==5) {
-						this.broadcast(Minigames.getMessage(timer + " seconds left before starting!", this.getMinigame().getPrefix(), false));
+						this.broadcast(Minigames.getMessage(Minigames.xSecsLeft.replaceAll("%secs%", timer.toString()), this.getMinigame().getPrefix(), false));
 						Player[] list2 = this.getAllPlayers();
 						for(Player p : list2) {
 							TitleAPI.sendTitle(p, 5, 10, 5, ChatColor.GREEN + "5", "");
 						}
 					}
 					else if(timer==4) {
-						this.broadcast(Minigames.getMessage(timer + " seconds left before starting!", this.getMinigame().getPrefix(), false));
+						this.broadcast(Minigames.getMessage(Minigames.xSecsLeft.replaceAll("%secs%", timer.toString()), this.getMinigame().getPrefix(), false));
 						Player[] list2 = this.getAllPlayers();
 						for(Player p : list2) {
 							TitleAPI.sendTitle(p, 5, 10, 5, ChatColor.YELLOW + "4", "");
 						}
 					}
 					else if(timer==3) {
-						this.broadcast(Minigames.getMessage(timer + " seconds left before starting!", this.getMinigame().getPrefix(), false));
+						this.broadcast(Minigames.getMessage(Minigames.xSecsLeft.replaceAll("%secs%", timer.toString()), this.getMinigame().getPrefix(), false));
 						Player[] list2 = this.getAllPlayers();
 						for(Player p : list2) {
 							TitleAPI.sendTitle(p, 5, 10, 5, ChatColor.GOLD + "3", "");
 						}
 					}
 					else if(timer==2) {
-						this.broadcast(Minigames.getMessage(timer + " seconds left before starting!", this.getMinigame().getPrefix(), false));
+						this.broadcast(Minigames.getMessage(Minigames.xSecsLeft.replaceAll("%secs%", timer.toString()), this.getMinigame().getPrefix(), false));
 						Player[] list2 = this.getAllPlayers();
 						for(Player p : list2) {
 							TitleAPI.sendTitle(p, 5, 10, 5, ChatColor.RED + "2", "");
 						}
 					}
 					else if(timer==1) {
-						this.broadcast(Minigames.getMessage(timer + " seconds left before starting!", this.getMinigame().getPrefix(), false));
+						this.broadcast(Minigames.getMessage(Minigames.OneSecLeft, this.getMinigame().getPrefix(), false));
 						Player[] list2 = this.getAllPlayers();
 						for(Player p : list2) {
 							TitleAPI.sendTitle(p, 5, 10, 5, ChatColor.DARK_RED + "1", "");
@@ -204,8 +204,12 @@ public class Arena {
 		if(pl.size()==0) {
 			return new Player[]{};
 		}
-		Player[] list = new Player[pl.size()];
-		list = pl.toArray(list);
+		ArrayList<Player> arr = new ArrayList<Player>();
+		for(String s : pl) {
+			arr.add(WolvSK.getInstance().getServer().getPlayer(s));
+		}
+		Player[] list = new Player[arr.size()];
+		list = arr.toArray(list);
 		return list;
 	}
 	

@@ -10,7 +10,7 @@ public class Minigame {
 
 	private String mgname;
 	private ArrayList<Arena> arenas = new ArrayList<Arena>();
-	private static HashMap<Player, Arena> players = new HashMap<Player, Arena>();
+	private static HashMap<String, Arena> players = new HashMap<String, Arena>();
 	private String cmd;
 	private String mgprefix;
 	
@@ -83,8 +83,8 @@ public class Minigame {
 	}
 	
 	public Arena getArena(Player p) {
-		if(players.containsKey(p)) {
-			return players.get(p);
+		if(players.containsKey(p.getName())) {
+			return players.get(p.getName());
 		}
 		else {
 			return null;
@@ -105,9 +105,9 @@ public class Minigame {
 	
 	public void setArena(Player p, Arena arena) {
 		if(arena==null) {
-			players.remove(p);
+			players.remove(p.getName());
 			return;
 		}
-		players.put(p, arena);
+		players.put(p.getName(), arena);
 	}
 }
