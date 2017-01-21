@@ -9,7 +9,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.scheduler.BukkitScheduler;
 
 import ch.njol.skript.Skript;
@@ -19,9 +18,7 @@ import ch.njol.skript.registrations.EventValues;
 import ch.njol.skript.util.Getter;
 import ch.njol.skript.util.Timespan;
 import fr.nashoba24.wolvsk.WolvSK;
-import fr.nashoba24.wolvsk.misc.anvilgui.CloseAnvilGUIEvent;
-import fr.nashoba24.wolvsk.misc.anvilgui.EffOpenAnvilGUI;
-import fr.nashoba24.wolvsk.misc.anvilgui.EvtCloseAnvilGUI;
+import fr.nashoba24.wolvsk.misc.anvilgui.WolvSKAnvilGUI;
 import fr.nashoba24.wolvsk.misc.spectate.EffSpectate1_10_R1;
 import fr.nashoba24.wolvsk.misc.spectate.EffSpectate1_11_R1;
 import fr.nashoba24.wolvsk.misc.spectate.EffSpectate1_8_R1;
@@ -59,23 +56,7 @@ public class WolvSKMisc implements Listener {
 		   Skript.registerEffect(EffCallMethodWithParams.class, "call (function|method) %string% with param[meter][s] %objects% in class[ named] %string%");
 		   Skript.registerEffect(EffCallMethodWithoutParams.class, "call (function|method) %string% [without param[meter][s]] in class[ named] %string%");
 		   Skript.registerEvent("Rage Event", SimpleEvent.class, PlayerRageEvent.class, "[player ]rage");
-		   Skript.registerEffect(EffOpenAnvilGUI.class, "open[ a[n]] anvil gui name[d] %string% to %player%", "open[ a[n]] anvil gui name[d] %string% to %player% with[ default] text %string%");
-		   Skript.registerEvent("Anvil GUI", EvtCloseAnvilGUI.class, CloseAnvilGUIEvent.class, "(close|confirm|done)[ a[n]] anvil gui name[d] %string%");
-		   EventValues.registerEventValue(CloseAnvilGUIEvent.class, Player.class, new Getter<Player, CloseAnvilGUIEvent>() {
-			   public Player get(CloseAnvilGUIEvent e) {
-				   return e.getPlayer();
-			   }
-		   }, 0);
-		   EventValues.registerEventValue(CloseAnvilGUIEvent.class, String.class, new Getter<String, CloseAnvilGUIEvent>() {
-			   public String get(CloseAnvilGUIEvent e) {
-				   return e.getInputText();
-			   }
-		   }, 0);
-		   EventValues.registerEventValue(CloseAnvilGUIEvent.class, Inventory.class, new Getter<Inventory, CloseAnvilGUIEvent>() {
-			   public Inventory get(CloseAnvilGUIEvent e) {
-				   return e.getInventory();
-			   }
-		   }, 0);
+		   WolvSKAnvilGUI.registerAll();
 		   String version = WolvSK.getInstance().getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
 		   switch(version) {
 		   		case "v1_8_R1":

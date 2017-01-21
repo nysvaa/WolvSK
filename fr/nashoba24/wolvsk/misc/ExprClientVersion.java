@@ -52,7 +52,7 @@ public class ExprClientVersion extends SimpleExpression<Integer> implements List
 	
 	@Override
 	public String toString(@Nullable Event e, boolean paramBoolean) {
-		return "country/country code of player/ip";
+		return "client version";
 	}
 	
 	@Override

@@ -34,7 +34,7 @@ public class ExprArenaTimer extends SimpleExpression<Integer>{
 	
 	@Override
 	public String toString(@Nullable Event e, boolean paramBoolean) {
-		return "arena timer";
+		return "arena default timer";
 	}
 	
 	@Override

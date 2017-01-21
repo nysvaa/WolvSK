@@ -349,7 +349,9 @@ public class Minigames implements Listener, CommandExecutor {
 					Arena[] list2 = mg.getArenas();
 					for(Arena a : list2) {
 						if(!a.isStarted()) {
-							a.timer();
+							if(a.getAllPlayers().length!=0) {
+								a.countdown();
+							}
 						}
 						else {
 							a.finish();
@@ -1235,7 +1237,7 @@ public class Minigames implements Listener, CommandExecutor {
 		   Skript.registerExpression(ExprArenaMax.class, Integer.class, ExpressionType.PROPERTY, "max[imum][ of player[s]] of %arena%", "%arena%['s] max[imum][ of player[s]]");
 		   Skript.registerExpression(ExprArenaMin.class, Integer.class, ExpressionType.PROPERTY, "min[imum][ of player[s]] of %arena%", "%arena%['s] min[imum][ of player[s]]");
 		   Skript.registerExpression(ExprArenaCount.class, Integer.class, ExpressionType.PROPERTY, "([player ]count|number of player[s]) of %arena%", "%arena%['s] ([player ]count|number of player[s])");
-		   Skript.registerExpression(ExprArenaTimer.class, Integer.class, ExpressionType.PROPERTY, "[default ]timer of %arena%", "%arena%['s] [default ]timer");
+		   Skript.registerExpression(ExprArenaTimer.class, Integer.class, ExpressionType.PROPERTY, "default (timer|countdown) of %arena%", "%arena%['s] default (timer|countdown)");
 		   Skript.registerExpression(ExprArenaPlayers.class, Player.class, ExpressionType.PROPERTY, "[all ]players (in|of) %arena%");
 		   Skript.registerExpression(ExprMinigameChatFormat.class, String.class, ExpressionType.PROPERTY, "chat format of minigames");
 		   Skript.registerExpression(ExprMinigameMessageFormat.class, String.class, ExpressionType.PROPERTY, "message format of minigames");
@@ -1291,6 +1293,22 @@ public class Minigames implements Listener, CommandExecutor {
 		   EventValues.registerEventValue(PlayerLeaveArenaEvent.class, Player.class, new Getter<Player, PlayerLeaveArenaEvent>() {
 			   public Player get(PlayerLeaveArenaEvent e) {
 				   return e.getPlayer();
+			   }
+		   }, 0);
+		   Skript.registerEvent("Arena Countdown Event", SimpleEvent.class, ArenaCountdownEvent.class, "arena (countdown|timer)[ change]");
+		   EventValues.registerEventValue(ArenaCountdownEvent.class, Arena.class, new Getter<Arena, ArenaCountdownEvent>() {
+			   public Arena get(ArenaCountdownEvent e) {
+				   return e.getArena();
+			   }
+		   }, 0);
+		   EventValues.registerEventValue(ArenaCountdownEvent.class, Minigame.class, new Getter<Minigame, ArenaCountdownEvent>() {
+			   public Minigame get(ArenaCountdownEvent e) {
+				   return e.getMinigame();
+			   }
+		   }, 0);
+		   EventValues.registerEventValue(ArenaCountdownEvent.class, Integer.class, new Getter<Integer, ArenaCountdownEvent>() {
+			   public Integer get(ArenaCountdownEvent e) {
+				   return e.getCountdown();
 			   }
 		   }, 0);
 	}

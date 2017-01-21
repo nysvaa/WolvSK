@@ -21,8 +21,8 @@ public class Arena {
 	private Integer maxp;
 	private ArrayList<String> pl = new ArrayList<String>();
 	private boolean started = false;
-	private Integer defaultTimer = 120;
-	private Integer timer = 120;
+	private Integer defaulttimer = 120;
+	private Integer countdown = 120;
 	private ArrayList<Block> signs = new ArrayList<Block>();
 
 	public Arena(Minigame mg, String name, Integer min, Integer max) {
@@ -101,12 +101,12 @@ public class Arena {
 	}
 	
 	public void setDefaultTimer(Integer i, boolean save) {
-		if(timer==defaultTimer) {
-			timer = i;
-			defaultTimer = i;
+		if(countdown==defaulttimer) {
+			countdown = i;
+			defaulttimer = i;
 		}
 		else {
-			defaultTimer = i;
+			defaulttimer = i;
 		}
 		if(save) {
 			Minigames.save(this.getMinigame());
@@ -114,73 +114,74 @@ public class Arena {
 	}
 	
 	public Integer getDefaultTimer() {
-		return defaultTimer;
+		return defaulttimer;
 	}
 	
 	public void finish() {
 		if(this.isStarted()) {
 			if(this.playersCount()==0 || this.playersCount()==1) {
 				Minigames.stop(this.getMinigame(), this);
+				countdown = defaulttimer;
 			}
 		}
 	}
 	
-	public void timer() {
+	public void countdown() {
 		if(this.playersCount()>=this.getMin()) {
-			--timer;
-			if(timer==0) {
+			--countdown;
+			if(countdown==0) {
 				boolean s = Minigames.start(this.getMinigame(), this, false);
 				if(!s) {
-					timer = defaultTimer - 1;
+					countdown = defaulttimer - 1;
 				}
 			}
 			Player[] list = this.getAllPlayers();
 			for(Player p : list) {
-				p.setExp(timer.floatValue()/defaultTimer.floatValue());
-				p.setLevel(timer);
+				p.setExp(countdown.floatValue()/defaulttimer.floatValue());
+				p.setLevel(countdown);
 			}
-			if(timer!=defaultTimer) {
-				if(timer>=30) {
-					if(timer % 30 == 0) {
-						this.broadcast(Minigames.getMessage(Minigames.xSecsLeft.replaceAll("%secs%", timer.toString()), this.getMinigame().getPrefix(), false));
+			if(countdown!=defaulttimer) {
+				if(countdown>=30) {
+					if(countdown % 30 == 0) {
+						this.broadcast(Minigames.getMessage(Minigames.xSecsLeft.replaceAll("%secs%", countdown.toString()), this.getMinigame().getPrefix(), false));
 					}
 				}
 				else {
-					if(timer==20) {
-						this.broadcast(Minigames.getMessage(Minigames.xSecsLeft.replaceAll("%secs%", timer.toString()), this.getMinigame().getPrefix(), false));
+					if(countdown==20) {
+						this.broadcast(Minigames.getMessage(Minigames.xSecsLeft.replaceAll("%secs%", countdown.toString()), this.getMinigame().getPrefix(), false));
 					}
-					else if(timer==10) {
-						this.broadcast(Minigames.getMessage(Minigames.xSecsLeft.replaceAll("%secs%", timer.toString()), this.getMinigame().getPrefix(), false));
+					else if(countdown==10) {
+						this.broadcast(Minigames.getMessage(Minigames.xSecsLeft.replaceAll("%secs%", countdown.toString()), this.getMinigame().getPrefix(), false));
 					}
-					else if(timer==5) {
-						this.broadcast(Minigames.getMessage(Minigames.xSecsLeft.replaceAll("%secs%", timer.toString()), this.getMinigame().getPrefix(), false));
+					else if(countdown==5) {
+						this.broadcast(Minigames.getMessage(Minigames.xSecsLeft.replaceAll("%secs%", countdown.toString()), this.getMinigame().getPrefix(), false));
 						Player[] list2 = this.getAllPlayers();
 						for(Player p : list2) {
 							TitleAPI.sendTitle(p, 5, 10, 5, ChatColor.GREEN + "5", "");
 						}
 					}
-					else if(timer==4) {
-						this.broadcast(Minigames.getMessage(Minigames.xSecsLeft.replaceAll("%secs%", timer.toString()), this.getMinigame().getPrefix(), false));
+					else if(countdown==4) {
+						this.broadcast(Minigames.getMessage(Minigames.xSecsLeft.replaceAll("%secs%", countdown.toString()), this.getMinigame().getPrefix(), false));
 						Player[] list2 = this.getAllPlayers();
 						for(Player p : list2) {
 							TitleAPI.sendTitle(p, 5, 10, 5, ChatColor.YELLOW + "4", "");
 						}
 					}
-					else if(timer==3) {
-						this.broadcast(Minigames.getMessage(Minigames.xSecsLeft.replaceAll("%secs%", timer.toString()), this.getMinigame().getPrefix(), false));
+					else if(countdown==3) {
+						this.broadcast(Minigames.getMessage(Minigames.xSecsLeft.replaceAll("%secs%", countdown.toString()), this.getMinigame().getPrefix(), false));
 						Player[] list2 = this.getAllPlayers();
 						for(Player p : list2) {
 							TitleAPI.sendTitle(p, 5, 10, 5, ChatColor.GOLD + "3", "");
 						}
 					}
-					else if(timer==2) {
-						this.broadcast(Minigames.getMessage(Minigames.xSecsLeft.replaceAll("%secs%", timer.toString()), this.getMinigame().getPrefix(), false));
+					else if(countdown==2) {
+						this.broadcast(Minigames.getMessage(Minigames.xSecsLeft.replaceAll("%secs%", countdown.toString()), this.getMinigame().getPrefix(), false));
 						Player[] list2 = this.getAllPlayers();
 						for(Player p : list2) {
 							TitleAPI.sendTitle(p, 5, 10, 5, ChatColor.RED + "2", "");
 						}
 					}
-					else if(timer==1) {
+					else if(countdown==1) {
 						this.broadcast(Minigames.getMessage(Minigames.OneSecLeft, this.getMinigame().getPrefix(), false));
 						Player[] list2 = this.getAllPlayers();
 						for(Player p : list2) {
@@ -191,13 +192,14 @@ public class Arena {
 			}
 		}
 		else {
-			timer = defaultTimer;
+			countdown = defaulttimer;
 			Player[] list = this.getAllPlayers();
 			for(Player p : list) {
-				p.setExp(timer/defaultTimer - 0.01F);
-				p.setLevel(timer);
+				p.setExp(countdown/defaulttimer - 0.01F);
+				p.setLevel(countdown);
 			}
 		}
+		Bukkit.getServer().getPluginManager().callEvent(new ArenaCountdownEvent(this.game, this, countdown));
 	}
 	
 	public Player[] getAllPlayers() {
@@ -211,6 +213,10 @@ public class Arena {
 		Player[] list = new Player[arr.size()];
 		list = arr.toArray(list);
 		return list;
+	}
+	
+	public Integer getCountdown() {
+		return countdown;
 	}
 	
 	public void setStarted(boolean b) {
