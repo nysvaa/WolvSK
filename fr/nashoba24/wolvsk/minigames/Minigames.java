@@ -1241,6 +1241,7 @@ public class Minigames implements Listener, CommandExecutor {
 		   Skript.registerExpression(ExprArenaPlayers.class, Player.class, ExpressionType.PROPERTY, "[all ]players (in|of) %arena%");
 		   Skript.registerExpression(ExprMinigameChatFormat.class, String.class, ExpressionType.PROPERTY, "chat format of minigames");
 		   Skript.registerExpression(ExprMinigameMessageFormat.class, String.class, ExpressionType.PROPERTY, "message format of minigames");
+		   Skript.registerExpression(ExprArenaTimer.class, Integer.class, ExpressionType.PROPERTY, "countdown of %arena%", "%arena%['s] countdown");
 		   Skript.registerEvent("Arena Start Event", SimpleEvent.class, ArenaStartEvent.class, "arena start");
 		   EventValues.registerEventValue(ArenaStartEvent.class, Arena.class, new Getter<Arena, ArenaStartEvent>() {
 			   public Arena get(ArenaStartEvent e) {
