@@ -35,12 +35,7 @@ public class CondEssentialsGodMode extends Condition {
     	Essentials ess = ((Essentials) WolvSK.getInstance().getServer().getPluginManager().getPlugin("Essentials"));
     	User user = ess.getUser(player.getSingle(e));
     	if(user==null) { return false; }
-        if(user.isGodModeEnabled()) {
-        	return true;
-        }
-        else {
-        	return false;
-        }
+    	return user.isGodModeEnabled();
     }
 
 }

@@ -34,12 +34,7 @@ public class CondEssentialsAFK extends Condition {
     	Essentials ess = ((Essentials) WolvSK.getInstance().getServer().getPluginManager().getPlugin("Essentials"));
     	User user = ess.getUser(player.getSingle(e));
     	if(user==null) { return false; }
-        if(user.isAfk()) {
-        	return true;
-        }
-        else {
-        	return false;
-        }
+    	return user.isAfk();
     }
 
 }

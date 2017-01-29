@@ -7,13 +7,14 @@ import org.bukkit.event.Event;
 
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.User;
+
 import ch.njol.skript.lang.Condition;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.util.Kleenean;
 import fr.nashoba24.wolvsk.WolvSK;
 
-public class CondEssentialsVanish extends Condition {
+public class CondEssentialsHasPowertools extends Condition {
 
     private Expression<Player> player;
 
@@ -26,7 +27,7 @@ public class CondEssentialsVanish extends Condition {
 
     @Override
     public String toString(@Nullable Event e, boolean b) {
-        return "player is vanish";
+        return "player has power tools";
     }
 
     @Override
@@ -34,7 +35,7 @@ public class CondEssentialsVanish extends Condition {
     	Essentials ess = ((Essentials) WolvSK.getInstance().getServer().getPluginManager().getPlugin("Essentials"));
     	User user = ess.getUser(player.getSingle(e));
     	if(user==null) { return false; }
-    	return user.isVanished();
+    	return user.hasPowerTools();
     }
 
 }
