@@ -15,6 +15,7 @@ import ch.njol.skript.util.Getter;
 import com.wasteofplastic.askyblock.events.CoopJoinEvent;
 import com.wasteofplastic.askyblock.events.CoopLeaveEvent;
 import com.wasteofplastic.askyblock.events.IslandEnterEvent;
+import com.wasteofplastic.askyblock.events.IslandExitEvent;
 import com.wasteofplastic.askyblock.events.IslandLeaveEvent;
 import com.wasteofplastic.askyblock.events.IslandLevelEvent;
 import com.wasteofplastic.askyblock.events.IslandNewEvent;
@@ -71,6 +72,17 @@ public class WolvSKASkyBlock {
 			   }, 0);
 			   EventValues.registerEventValue(IslandLeaveEvent.class, Location.class, new Getter<Location, IslandLeaveEvent>() {
 				   public Location get(IslandLeaveEvent e) {
+					   return e.getIslandLocation();
+				   }
+			   }, 0);
+			   Skript.registerEvent("Island Exit Event", SimpleEvent.class, IslandExitEvent.class, "asb[ island] exit");
+			   EventValues.registerEventValue(IslandExitEvent.class, Player.class, new Getter<Player, IslandExitEvent>() {
+				   public Player get(IslandExitEvent e) {
+					   return fr.nashoba24.wolvsk.WolvSK.getInstance().getServer().getPlayer(e.getPlayer());
+				   }
+			   }, 0);
+			   EventValues.registerEventValue(IslandExitEvent.class, Location.class, new Getter<Location, IslandExitEvent>() {
+				   public Location get(IslandExitEvent e) {
 					   return e.getIslandLocation();
 				   }
 			   }, 0);
