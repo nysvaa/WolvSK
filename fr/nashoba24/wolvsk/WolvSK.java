@@ -1,5 +1,6 @@
 package fr.nashoba24.wolvsk;
 
+import java.io.File;
 import java.util.HashMap;
 
 import org.bukkit.Bukkit;
@@ -16,6 +17,7 @@ import fr.nashoba24.wolvsk.minigames.Minigames;
 import fr.nashoba24.wolvsk.misc.WolvSKMisc;
 import fr.nashoba24.wolvsk.playerpoints.WolvSKPlayerPoints;
 import fr.nashoba24.wolvsk.pvparena.WolvSKPvpArena;
+import fr.nashoba24.wolvsk.quests.WolvSKQuests;
 import fr.nashoba24.wolvsk.serverquery.WolvSKPing;
 import fr.nashoba24.wolvsk.supertrails.WolvSKSuperTrails;
 import fr.nashoba24.wolvsk.wolvmc.WolvSKWolvMC;
@@ -35,15 +37,11 @@ public class WolvSK extends JavaPlugin implements Listener {
 	  public void onEnable()
 	  {
 		   instance = this;
-		   if(Bukkit.getServer().getPluginManager().getPlugin("ProtocolLib") != null) {
-			   Bukkit.getPluginManager().registerEvents(new Minigames(), this);
-			   getCommand("minigames").setExecutor(new Minigames());
+		   File file = new File(WolvSK.getInstance().getDataFolder() + "/");
+		   if(!file.exists()) {
+			   file.mkdir();
 		   }
 		   Skript.registerAddon(this);
-		   if(Bukkit.getServer().getPluginManager().getPlugin("ProtocolLib") != null) {
-			   Minigames.registerAll();
-			   Minigames.load();
-		   }
 		   WolvSKASkyBlock.registerAll();
 		   WolvSKEssentials.registerAll();
 		   WolvSKGuardianBeamAPI.registerAll();
@@ -54,6 +52,11 @@ public class WolvSK extends JavaPlugin implements Listener {
 		   WolvSKWolvMC.registerAll();
 		   WolvSKPlayerPoints.registerAll();
 		   WolvSKMaths.registerAll();
+		   //WolvSKQuests.registerAll();
+		   Bukkit.getPluginManager().registerEvents(new Minigames(), this);
+		   getCommand("minigames").setExecutor(new Minigames());
+		   Minigames.registerAll();
+		   Minigames.load();
 		   Bukkit.getLogger().info(ChatColor.translateAlternateColorCodes('&', "&aWolvSK Enabled!"));
 	  }
 
