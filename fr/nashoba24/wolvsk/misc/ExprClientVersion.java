@@ -63,10 +63,10 @@ public class ExprClientVersion extends SimpleExpression<Integer> implements List
 	
 	public static void registerClientVersion() {
 		Bukkit.getPluginManager().registerEvents(new ExprClientVersion(), WolvSK.getInstance());
-
+		
 		ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(WolvSK.getInstance(),
 				ListenerPriority.NORMAL,
-				PacketType.Handshake.Client.SET_PROTOCOL, PacketType.Login.Server.DISCONNECT) {
+				PacketType.Handshake.Client.SET_PROTOCOL) {
 
 			@Override
 			public void onPacketReceiving(final PacketEvent event) {
