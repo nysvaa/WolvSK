@@ -41,6 +41,9 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitScheduler;
 
+import com.earth2me.essentials.Essentials;
+import com.earth2me.essentials.User;
+
 import ch.njol.skript.Skript;
 import ch.njol.skript.classes.ClassInfo;
 import ch.njol.skript.classes.Parser;
@@ -51,6 +54,7 @@ import ch.njol.skript.registrations.Classes;
 import ch.njol.skript.registrations.EventValues;
 import ch.njol.skript.util.Getter;
 import fr.nashoba24.wolvsk.WolvSK;
+import fr.nashoba24.wolvsk.essentials.WolvSKEssentials;
 
 public class Minigames implements Listener, CommandExecutor {
 	
@@ -69,6 +73,7 @@ public class Minigames implements Listener, CommandExecutor {
 	public static String OneSecLeft = "The game will start in 1 second!";
 	public static String playerJoined = "%player% joined the game!";
 	public static String playerLeft = "%player% left the game!";
+	public static boolean customChatFormat = true;
 	
 	public static Minigame createMinigame(String name, String command, String prefix, boolean save) {
 		name = name.replaceAll(" ", "-");
@@ -296,7 +301,8 @@ public class Minigames implements Listener, CommandExecutor {
 				Minigames.getMinigame(p).getArena(p).removePlayer(p);
 				Minigames.getMinigame(p).setArena(p, null);
 				if(msg) {
-					arena.broadcast(Minigames.getMessage(playerLeft.replaceAll("%player%", p.getName()), arena.getMinigame().getPrefix(), false));
+					String m = playerLeft.replaceAll("%player%", p.getName()).replaceAll("%min%", arena.getMin().toString()).replaceAll("%max%", arena.getMax().toString()).replaceAll("%players count%", String.valueOf(arena.getAllPlayers().length));
+					arena.broadcast(Minigames.getMessage(m, arena.getMinigame().getPrefix(), false));
 				}
 				games.remove(p.getName());
 				if(lvl.containsKey(p.getName())) {
@@ -375,7 +381,19 @@ public class Minigames implements Listener, CommandExecutor {
 		Player p = e.getPlayer();
 		if(Minigames.inGame(p)) {
 			e.setCancelled(true);
-			Minigames.getMinigame(p).getArena(p).chat(p, e.getMessage());
+			if(customChatFormat) {
+				Minigames.getMinigame(p).getArena(p).chat(p, e.getMessage());
+			}
+			else {
+				if(WolvSKEssentials.ess) {
+			    	Essentials ess = ((Essentials) WolvSK.getInstance().getServer().getPluginManager().getPlugin("Essentials"));
+			    	User user = ess.getUser(p);
+			    	Minigames.getMinigame(p).getArena(p).broadcast(e.getFormat().replaceFirst("%s", ChatColor.RESET + user.getNick(true) + ChatColor.RESET).replaceFirst("%s", ChatColor.RESET + e.getMessage() + ChatColor.RESET));
+				}
+				else {
+					Minigames.getMinigame(p).getArena(p).broadcast(e.getFormat().replaceFirst("%s", ChatColor.RESET + p.getName() + ChatColor.RESET).replaceFirst("%s", ChatColor.RESET + e.getMessage() + ChatColor.RESET));
+				}
+			}
 			System.out.println("[Arena: " + Minigames.getMinigame(p).getArena(p).getName() + ", Minigame: " + Minigames.getMinigame(p).getName() + "] " + p.getName() + " > " + e.getMessage());
 		}
 	}
@@ -513,7 +531,8 @@ public class Minigames implements Listener, CommandExecutor {
 							}
 							boolean success = join(e.getPlayer(), mg, mg.getArena(sign.getLine(1), false), true);
 							if(success) {
-								mg.getArena(sign.getLine(1), false).broadcast(Minigames.getMessage(playerJoined.replaceAll("%player%", e.getPlayer().getName()), mg.getPrefix(), false));
+								String m = playerJoined.replaceAll("%player%", e.getPlayer().getName()).replaceAll("%min%", mg.getArena(sign.getLine(1), false).getMin().toString()).replaceAll("%max%", mg.getArena(sign.getLine(1), false).getMax().toString()).replaceAll("%players count%", String.valueOf(mg.getArena(sign.getLine(1), false).getAllPlayers().length));
+								mg.getArena(sign.getLine(1), false).broadcast(Minigames.getMessage(m, mg.getPrefix(), false));
 							}
 						}
 					}
@@ -589,7 +608,8 @@ public class Minigames implements Listener, CommandExecutor {
 						boolean s = Minigames.leave(p, false, true, mg.getPrefix());
 						if(s) {
 							p.sendMessage(ChatColor.GREEN + "[" + mg.getPrefix() + "] You left the game!");
-							a.broadcast(Minigames.getMessage(playerLeft.replaceAll("%player%", e.getPlayer().getName()), mg.getPrefix(), false));
+							String m = playerLeft.replaceAll("%player%", e.getPlayer().getName()).replaceAll("%min%", a.getMin().toString()).replaceAll("%max%", a.getMax().toString()).replaceAll("%players count%", String.valueOf(a.getAllPlayers().length));
+							a.broadcast(Minigames.getMessage(m, mg.getPrefix(), false));
 						}
 					}
 					else {
@@ -756,7 +776,8 @@ public class Minigames implements Listener, CommandExecutor {
 							}
 							boolean success = Minigames.join(p, mg, mg.getArena(args[1], true), true);
 							if(success) {
-								mg.getArena(args[1], true).broadcast(Minigames.getMessage(playerJoined.replaceAll("%player%", e.getPlayer().getName()), mg.getPrefix(), false));
+								String m = playerJoined.replaceAll("%player%", e.getPlayer().getName()).replaceAll("%min%", mg.getArena(args[1], true).getMin().toString()).replaceAll("%max%", mg.getArena(args[1], true).getMax().toString()).replaceAll("%players count%", String.valueOf(mg.getArena(args[1], true).getAllPlayers().length));
+								mg.getArena(args[1], true).broadcast(Minigames.getMessage(m, mg.getPrefix(), false));
 							}
 						}
 					}
@@ -1096,6 +1117,9 @@ public class Minigames implements Listener, CommandExecutor {
 		File file = new File(WolvSK.getInstance().getDataFolder() + "/mg-settings.yml");
 		if(file.exists()) {
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+			if(config.isSet("custom-chat-format")) {
+				Minigames.customChatFormat = config.getBoolean("custom-chat-format");
+			}
 			if(config.isSet("chat-format")) {
 				Minigames.chatFormat = config.getString("chat-format");
 			}
@@ -1431,6 +1455,7 @@ public class Minigames implements Listener, CommandExecutor {
 			}
 		}
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("custom-chat-format", Minigames.customChatFormat);
 		config.set("chat-format", Minigames.chatFormat);
 		config.set("message-format", Minigames.messageFormat);
 		ConfigurationSection sect = config.createSection("messages");
