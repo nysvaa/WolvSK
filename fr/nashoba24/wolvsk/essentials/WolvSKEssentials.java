@@ -14,9 +14,12 @@ import ch.njol.skript.registrations.EventValues;
 import ch.njol.skript.util.Getter;
 
 public class WolvSKEssentials {
+	
+	public static boolean ess = false;
 
 	public static void registerAll() {
 		   if (Bukkit.getServer().getPluginManager().getPlugin("Essentials") != null) {
+			   ess = true;
 			   Skript.registerEvent("User Balance Update", SimpleEvent.class, UserBalanceUpdateEvent.class, "[user ](balance|money) (update|change)");
 			   EventValues.registerEventValue(UserBalanceUpdateEvent.class, Player.class, new Getter<Player, UserBalanceUpdateEvent>() {
 				   public Player get(UserBalanceUpdateEvent e) {
