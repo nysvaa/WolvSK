@@ -41,9 +41,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitScheduler;
 
-import com.earth2me.essentials.Essentials;
-import com.earth2me.essentials.User;
-
 import ch.njol.skript.Skript;
 import ch.njol.skript.classes.ClassInfo;
 import ch.njol.skript.classes.Parser;
@@ -54,7 +51,6 @@ import ch.njol.skript.registrations.Classes;
 import ch.njol.skript.registrations.EventValues;
 import ch.njol.skript.util.Getter;
 import fr.nashoba24.wolvsk.WolvSK;
-import fr.nashoba24.wolvsk.essentials.WolvSKEssentials;
 
 public class Minigames implements Listener, CommandExecutor {
 	
@@ -380,21 +376,28 @@ public class Minigames implements Listener, CommandExecutor {
 	public void onChat(AsyncPlayerChatEvent e) {
 		Player p = e.getPlayer();
 		if(Minigames.inGame(p)) {
-			e.setCancelled(true);
-			if(customChatFormat) {
+			if(Minigames.customChatFormat) {
+				e.setCancelled(true);
 				Minigames.getMinigame(p).getArena(p).chat(p, e.getMessage());
 			}
 			else {
-				if(WolvSKEssentials.ess) {
-			    	Essentials ess = ((Essentials) WolvSK.getInstance().getServer().getPluginManager().getPlugin("Essentials"));
-			    	User user = ess.getUser(p);
-			    	Minigames.getMinigame(p).getArena(p).broadcast(e.getFormat().replaceFirst("%s", ChatColor.RESET + user.getNick(true) + ChatColor.RESET).replaceFirst("%s", ChatColor.RESET + e.getMessage() + ChatColor.RESET));
-				}
-				else {
-					Minigames.getMinigame(p).getArena(p).broadcast(e.getFormat().replaceFirst("%s", ChatColor.RESET + p.getName() + ChatColor.RESET).replaceFirst("%s", ChatColor.RESET + e.getMessage() + ChatColor.RESET));
+				e.getRecipients().clear();
+				for(Player pl : WolvSK.getInstance().getServer().getOnlinePlayers()){
+					if(Minigames.getMinigame(pl)!=null) {
+						if(Minigames.getMinigame(pl).getArena(pl).getName().equals(Minigames.getMinigame(p).getArena(p).getName()) && Minigames.getMinigame(pl).getCommand().equals(Minigames.getMinigame(p).getCommand())) {
+							e.getRecipients().add(pl);
+						}
+					}
 				}
 			}
 			System.out.println("[Arena: " + Minigames.getMinigame(p).getArena(p).getName() + ", Minigame: " + Minigames.getMinigame(p).getName() + "] " + p.getName() + " > " + e.getMessage());
+		}
+		else {
+			for(Player pl : WolvSK.getInstance().getServer().getOnlinePlayers()){
+				if(Minigames.inGame(pl)) {
+					e.getRecipients().remove(pl);
+				}
+			}
 		}
 	}
 	
