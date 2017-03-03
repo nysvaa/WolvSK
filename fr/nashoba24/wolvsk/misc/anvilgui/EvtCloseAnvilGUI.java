@@ -9,17 +9,24 @@ import ch.njol.skript.lang.SkriptParser;
 public class EvtCloseAnvilGUI extends SkriptEvent {
 	
 	private Literal<String> name;
+	private boolean n = false;
 
     @SuppressWarnings("unchecked")
 	@Override
     public boolean init(Literal<?>[] literals, int i, SkriptParser.ParseResult parseResult) {
-    	name = (Literal<String>) literals[0];
+    	if(i==0) {
+    		name = (Literal<String>) literals[0];
+    		n = true;
+    	}
         return true;
     }
 
     @Override
     public boolean check(Event e) {
-        return ((CloseAnvilGUIEvent) e).getGuiName().equals(name.getSingle(e));
+    	if(n) {
+    		return ((CloseAnvilGUIEvent) e).getGuiName().equals(name.getSingle(e));
+    	}
+    	return true;
     }
 
     @Override
