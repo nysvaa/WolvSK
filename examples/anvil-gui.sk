@@ -11,3 +11,6 @@ command /testgui:
 
 on close anvil gui named "Hey":
 	broadcast "%player% answer: %event-text%"
+
+on close anvil gui:
+	broadcast "%name of anvil gui% | %input text of anvil gui%"
