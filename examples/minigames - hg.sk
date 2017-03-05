@@ -18,12 +18,12 @@ command /hungergames [<text>] [<text>]:
 					add location of player to {hg.spawns.%argument 2%::*}
 					send "&aSpawn n°&2%size of {hg.spawns.%argument 2%::*}%&a ajouté pour l'arène &2%argument 2%&a!"
 				else:
-					send "&cTous les spawns ont déjà été placés!"
+					send "&cAll the spawns are already placed!"
 			else:
 				send "&6/hungergames &aaddspawn <arene>"
 		else if arg 1 is "removeall":
 			if arg 2 is set:
-				send "&aTous les spawns ont été retirés pour larène &2%argument 2%&a!"
+				send "&aAll the spawns were removed for the arena &2%argument 2%&a!"
 				clear {hg.spawns.%argument 2%::*}
 			else:
 				send "&6/hungergames &aremoveall <arene>"
@@ -31,12 +31,12 @@ command /hungergames [<text>] [<text>]:
 			if arg 2 is set:
 				if targeted block is a chest:
 					if {hg.chests.%argument 2%::*} contains location of targeted block:
-						send "&cCe coffre est déjà ajouté!"
+						send "&cThe chest you target is already added!"
 					else:
 						add location of targeted block to {hg.chests.%argument 2%::*}
-						send "&aLe coffre a été ajouté à l'arène &2%argument 2%&a!"
+						send "&aThe chest you target has been added for the arena &2%argument 2%&a!"
 				else:
-					send "&cLe bloc que vous pointez n'est pas un coffre!"
+					send "&cThe block you target is not a chest!"
 			else:
 				send "&6/hungergames &aaddchest <arene>"
 		else if arg 1 is "removechest":
@@ -44,11 +44,11 @@ command /hungergames [<text>] [<text>]:
 				if targeted block is a chest:
 					if {hg.chests.%argument 2%::*} contains location of targeted block:
 						remove location of targeted block from {hg.chests.%argument 2%::*}
-						send "&aCe coffre a été enlevé de l'arène &2%argument 2%&a!"
+						send "&aThis chest has been removed for the arena &2%argument 2%&a!"
 					else:
-						send "&cCe coffre n'est pas ajouté dans l'arène &4%argument 2%&c!"
+						send "&cThis chest is not registrered for the arena &4%argument 2%&c!"
 				else:
-					send "&cLe bloc que vous pointez n'est pas un coffre!"
+					send "&cThe block you target is not a chest!"
 			else:
 				send "&6/hungergames &aaddchest <arene>"
 on arena start:
@@ -65,7 +65,7 @@ on arena start:
 		set {_i} to 10
 		loop 10 times:
 			if event-arena is started:
-				broadcast "&6Le jeu commence dans %{_i}% secondes!" in event-arena
+				broadcast "&6The game start in %{_i}% seconds!" in event-arena
 				wait 1 second
 			else:
 				stop
@@ -81,7 +81,7 @@ on death of player:
 	if name of minigame minigame of player is "hungergames":
 		strike lightning at player
 		make player leave current arena
-		send "&cVous avez perdu!" to player
+		send "&cYou lose!" to player
 on break:
 	if name of minigame minigame of player is "hungergames":
 		cancel event
