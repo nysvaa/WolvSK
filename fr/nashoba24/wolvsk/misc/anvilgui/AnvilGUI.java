@@ -163,6 +163,9 @@ public class AnvilGUI implements Listener {
 			case "v1_11_R1":
 				inv = AnvilNMS1_11_R1.open(this);
 	 			break;
+			case "v1_12_R1":
+				inv = AnvilNMS1_12_R1.open(this);
+	 			break;
 	 		default:
 	 			Bukkit.getLogger().warning("You can't open anvil GUI because your Minecraft version is not supported!");
         }

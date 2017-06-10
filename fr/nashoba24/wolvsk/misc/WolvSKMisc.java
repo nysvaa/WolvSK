@@ -21,6 +21,7 @@ import fr.nashoba24.wolvsk.WolvSK;
 import fr.nashoba24.wolvsk.misc.anvilgui.WolvSKAnvilGUI;
 import fr.nashoba24.wolvsk.misc.spectate.EffSpectate1_10_R1;
 import fr.nashoba24.wolvsk.misc.spectate.EffSpectate1_11_R1;
+import fr.nashoba24.wolvsk.misc.spectate.EffSpectate1_12_R1;
 import fr.nashoba24.wolvsk.misc.spectate.EffSpectate1_8_R1;
 import fr.nashoba24.wolvsk.misc.spectate.EffSpectate1_8_R2;
 import fr.nashoba24.wolvsk.misc.spectate.EffSpectate1_8_R3;
@@ -28,6 +29,7 @@ import fr.nashoba24.wolvsk.misc.spectate.EffSpectate1_9_R1;
 import fr.nashoba24.wolvsk.misc.spectate.EffSpectate1_9_R2;
 import fr.nashoba24.wolvsk.misc.spectate.EffUnspectate1_10_R1;
 import fr.nashoba24.wolvsk.misc.spectate.EffUnspectate1_11_R1;
+import fr.nashoba24.wolvsk.misc.spectate.EffUnspectate1_12_R1;
 import fr.nashoba24.wolvsk.misc.spectate.EffUnspectate1_8_R1;
 import fr.nashoba24.wolvsk.misc.spectate.EffUnspectate1_8_R2;
 import fr.nashoba24.wolvsk.misc.spectate.EffUnspectate1_8_R3;
@@ -87,7 +89,14 @@ public class WolvSKMisc implements Listener {
 		   			Skript.registerEffect(EffSpectate1_11_R1.class, "wolvsk make %player% spectate %entity%");
 		   			Skript.registerEffect(EffUnspectate1_11_R1.class, "wolvsk make %player% stop spectating");
 		   			break;
+		   		case "v1_12_R1":
+		   			Skript.registerEffect(EffSpectate1_12_R1.class, "wolvsk make %player% spectate %entity%");
+		   			Skript.registerEffect(EffUnspectate1_12_R1.class, "wolvsk make %player% stop spectating");
+		   			break;
 		   }
+		   /////////////////////
+		   //Skript.registerEffect(EffMakeEntityGlow.class, "make %entity% glow for %players%");//TODO
+		   /////////////////////
 		   EventValues.registerEventValue(PlayerRageEvent.class, Player.class, new Getter<Player, PlayerRageEvent>() {
 			   public Player get(PlayerRageEvent e) {
 				   return e.getPlayer();

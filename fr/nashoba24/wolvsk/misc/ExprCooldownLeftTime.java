@@ -50,6 +50,7 @@ public class ExprCooldownLeftTime extends SimpleExpression<Timespan> {
 		return "cooldown left time";
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	@Nullable
 	protected Timespan[] get(Event e) {
