@@ -1,5 +1,7 @@
 package fr.nashoba24.wolvsk.askyblock;
 
+import java.util.UUID;
+
 import javax.annotation.Nullable;
 
 import org.bukkit.Location;
@@ -41,7 +43,13 @@ public class ExprASkyBlockOwner extends SimpleExpression<OfflinePlayer>{
 	@Override
 	@Nullable
 	protected OfflinePlayer[] get(Event e) {
-		return new OfflinePlayer[]{ fr.nashoba24.wolvsk.WolvSK.getInstance().getServer().getOfflinePlayer(ASkyBlockAPI.getInstance().getOwner(loc.getSingle(e))) };
+		UUID uuid = ASkyBlockAPI.getInstance().getOwner(loc.getSingle(e));
+		if(uuid==null) {
+			return null;
+		}
+		else {
+			return new OfflinePlayer[]{ fr.nashoba24.wolvsk.WolvSK.getInstance().getServer().getOfflinePlayer(uuid) };
+		}
 	}
 }
 

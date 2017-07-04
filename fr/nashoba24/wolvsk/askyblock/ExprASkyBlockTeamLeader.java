@@ -43,6 +43,9 @@ public class ExprASkyBlockTeamLeader extends SimpleExpression<OfflinePlayer>{
 	@Override
 	@Nullable
 	protected OfflinePlayer[] get(Event e) {
+		if(player.getSingle(e)==null) {
+			return null;
+		}
 		UUID uuid = ASkyBlockAPI.getInstance().getTeamLeader(player.getSingle(e).getUniqueId());
 		if(uuid == null) {
 			return null;

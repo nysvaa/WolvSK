@@ -1,5 +1,6 @@
 package fr.nashoba24.wolvsk.askyblock;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,7 +45,13 @@ public class ExprASkyBlockTeamMembers extends SimpleExpression<OfflinePlayer>{
 	@Override
 	@Nullable
 	protected OfflinePlayer[] get(Event e) {
+		if(player.getSingle(e)==null) {
+			return null;
+		}
 		List<UUID> list = ASkyBlockAPI.getInstance().getTeamMembers(player.getSingle(e).getUniqueId());
+		if(list==null) {
+			list = new ArrayList<UUID>();
+		}
 		OfflinePlayer[] pl = new OfflinePlayer[list.size()];
 		Integer i = 0;
 		for(UUID uuid : list) {
