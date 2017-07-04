@@ -1009,7 +1009,7 @@ public class Minigames implements Listener, CommandExecutor {
 										p.sendMessage(ChatColor.RED + "[" + mg.getPrefix() + "] The minimum of player cannot be greater than the maximum of player");
 										return;
 									}
-									if(min<=1) {
+									if(min<1) {
 										p.sendMessage(ChatColor.RED + "[" + mg.getPrefix() + "] The minimum of player must be greater than 0!");
 										return;
 									}
@@ -1164,10 +1164,7 @@ public class Minigames implements Listener, CommandExecutor {
 								Arena arena = new Arena(minigame, section2.getString("name"), section2.getInt("min"), section2.getInt("max"));
 								minigame.addArena(arena, false);
 								if(section2.isSet("lobby.x") && section2.isSet("lobby.y") && section2.isSet("lobby.z") && section2.isSet("lobby.world")) {
-									World w = WolvSK.getInstance().getServer().getWorld(section2.getString("lobby.world"));
-									if(w!=null) {
-										arena.setLobby(new Location(w, section2.getInt("lobby.x"), section2.getInt("lobby.y"), section2.getInt("lobby.z")), false);
-									}
+									arena.setLobby(new Integer[]{section2.getInt("lobby.x"),  section2.getInt("lobby.y"),  section2.getInt("lobby.z")}, section2.getString("lobby.world"), false);
 								}
 								if(section2.isSet("timer")) {
 									arena.setDefaultTimer(section2.getInt("timer"), false);

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
@@ -16,7 +17,9 @@ public class Arena {
 	
 	private String arenaname;
 	private Minigame game;
-	private Location lobby;
+	//private Location lobby;
+	private Integer[] lobbyCoos;
+	private String lobbyWorld;
 	private Integer minp;
 	private Integer maxp;
 	private ArrayList<String> pl = new ArrayList<String>();
@@ -34,14 +37,29 @@ public class Arena {
 	}
 	
 	public void setLobby(Location loc, boolean save) {
-		lobby = loc;
+		lobbyCoos = new Integer[]{(int) loc.getX(), (int) loc.getY(), (int) loc.getZ()};
+		lobbyWorld = loc.getWorld().getName();
+		if(save) {
+			Minigames.save(this.getMinigame());
+		}
+	}
+	
+	public void setLobby(Integer[] coos, String world, boolean save) {
+		lobbyCoos = coos;
+		lobbyWorld = world;
 		if(save) {
 			Minigames.save(this.getMinigame());
 		}
 	}
 	
 	public Location getLobby() {
-		return lobby;
+		if(lobbyCoos!=null && lobbyWorld!=null) {
+			World world = Bukkit.getWorld(lobbyWorld);
+			if(lobbyCoos.length==3 && world!=null) {
+				return new Location(world, (double) lobbyCoos[0], (double) lobbyCoos[1], (double) lobbyCoos[2]);
+			}
+		}
+		return null;
 	}
 	
 	public Minigame getMinigame() {
