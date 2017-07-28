@@ -149,7 +149,7 @@ public class Arena {
 			return;
 		}
 		if(this.playersCount()>=this.getMin()) {
-			if(countdown<1) {
+			if(countdown<0) {
 				countdown = defaulttimer;
 			}
 			--countdown;

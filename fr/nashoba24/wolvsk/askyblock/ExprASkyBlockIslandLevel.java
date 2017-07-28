@@ -12,7 +12,7 @@ import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 
-public class ExprASkyBlockIslandLevel extends SimpleExpression<Integer>{
+public class ExprASkyBlockIslandLevel extends SimpleExpression<Long>{
 	private Expression<Player> player;
 	
 	@Override
@@ -21,8 +21,8 @@ public class ExprASkyBlockIslandLevel extends SimpleExpression<Integer>{
 	}
 	
 	@Override
-	public Class<? extends Integer> getReturnType() {
-		return Integer.class;
+	public Class<? extends Long> getReturnType() {
+		return Long.class;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -39,8 +39,8 @@ public class ExprASkyBlockIslandLevel extends SimpleExpression<Integer>{
 	
 	@Override
 	@Nullable
-	protected Integer[] get(Event e) {
-		return new Integer[]{ ASkyBlockAPI.getInstance().getIslandLevel(player.getSingle(e).getUniqueId()) };
+	protected Long[] get(Event e) {
+		return new Long[]{ ASkyBlockAPI.getInstance().getLongIslandLevel(player.getSingle(e).getUniqueId()) };
 	}
 }
 

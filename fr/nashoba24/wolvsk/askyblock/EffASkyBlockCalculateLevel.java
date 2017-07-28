@@ -1,16 +1,18 @@
 package fr.nashoba24.wolvsk.askyblock;
 
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.UUID;
+
 import javax.annotation.Nullable;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+
 import com.wasteofplastic.askyblock.ASkyBlock;
-import com.wasteofplastic.askyblock.LevelCalc;
 import com.wasteofplastic.askyblock.LevelCalcByChunk;
 import com.wasteofplastic.askyblock.Settings;
-
 import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
@@ -19,6 +21,7 @@ import ch.njol.util.Kleenean;
 public class EffASkyBlockCalculateLevel extends Effect {
 	
 	private Expression<Player> player;
+	public static HashMap<UUID, Long> levelWaitTime = new HashMap<UUID, Long>();
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -35,7 +38,7 @@ public class EffASkyBlockCalculateLevel extends Effect {
 	@Override
 	protected void execute(Event e) {
 		//ASkyBlockAPI.getInstance().calculateIslandLevel(player.getSingle(e).getUniqueId());
-        if (Settings.fastLevelCalc) {
+        /*if (Settings.fastLevelCalc) {
             new LevelCalcByChunk(ASkyBlock.getPlugin(), player.getSingle(e).getUniqueId(), Bukkit.getServer().getConsoleSender(), false);
         } else {
             if (ASkyBlock.getPlugin().isCalculatingLevel()) {
@@ -44,7 +47,28 @@ public class EffASkyBlockCalculateLevel extends Effect {
             }
             ASkyBlock.getPlugin().setCalculatingLevel(true);
             LevelCalc levelCalc = new LevelCalc(ASkyBlock.getPlugin(), player.getSingle(e).getUniqueId(), Bukkit.getServer().getConsoleSender(), false);
-            levelCalc.runTaskTimer(ASkyBlock.getPlugin(), 0L, 5L);
+           levelCalc.runTaskTimer(ASkyBlock.getPlugin(), 0L, 5L);
+        }*/ 
+		Player asker = player.getSingle(e);
+        if (!onLevelWaitTime(asker) || Settings.levelWait <= 0) {
+            setLevelWaitTime(asker);
+            new LevelCalcByChunk(ASkyBlock.getPlugin(), asker.getUniqueId(), Bukkit.getServer().getConsoleSender(), false);
         }
 	}
+	
+    public boolean onLevelWaitTime(final Player player) {
+        if (levelWaitTime.containsKey(player.getUniqueId())) {
+            if (levelWaitTime.get(player.getUniqueId()).longValue() > Calendar.getInstance().getTimeInMillis()) {
+                return true;
+            }
+
+            return false;
+        }
+
+        return false;
+    }
+    
+    public void setLevelWaitTime(final Player player) {
+        levelWaitTime.put(player.getUniqueId(), Long.valueOf(Calendar.getInstance().getTimeInMillis() + Settings.levelWait * 1000));
+    }
 }

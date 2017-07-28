@@ -41,7 +41,12 @@ public class ExprASkyBlockHomeLocation extends SimpleExpression<Location>{
 	@Override
 	@Nullable
 	protected Location[] get(Event e) {
-		return new Location[]{ ASkyBlockAPI.getInstance().getHomeLocation(player.getSingle(e).getUniqueId()) };
+		if(player.getSingle(e)!=null) {
+			return new Location[]{ ASkyBlockAPI.getInstance().getHomeLocation(player.getSingle(e).getUniqueId()) };
+		}
+		else {
+			return null;
+		}
 	}
 }
 

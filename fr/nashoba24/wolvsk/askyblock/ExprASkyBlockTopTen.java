@@ -41,10 +41,10 @@ public class ExprASkyBlockTopTen extends SimpleExpression<OfflinePlayer>{
 	@Override
 	@Nullable
 	protected OfflinePlayer[] get(Event e) {
-		Map<UUID, Integer> list = ASkyBlockAPI.getInstance().getTopTen();
+		Map<UUID, Long> list = ASkyBlockAPI.getInstance().getLongTopTen();
 		OfflinePlayer[] pl = new OfflinePlayer[list.size()];
 		Integer i = 0;
-		for (Entry<UUID, Integer> entry : list.entrySet())
+		for (Entry<UUID, Long> entry : list.entrySet())
 		{
 			pl[i] = fr.nashoba24.wolvsk.WolvSK.getInstance().getServer().getOfflinePlayer(entry.getKey());
 			++i;

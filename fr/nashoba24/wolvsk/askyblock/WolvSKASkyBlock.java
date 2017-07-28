@@ -17,8 +17,8 @@ import com.wasteofplastic.askyblock.events.CoopLeaveEvent;
 import com.wasteofplastic.askyblock.events.IslandEnterEvent;
 import com.wasteofplastic.askyblock.events.IslandExitEvent;
 import com.wasteofplastic.askyblock.events.IslandLeaveEvent;
-import com.wasteofplastic.askyblock.events.IslandLevelEvent;
 import com.wasteofplastic.askyblock.events.IslandNewEvent;
+import com.wasteofplastic.askyblock.events.IslandPostLevelEvent;
 import com.wasteofplastic.askyblock.events.IslandResetEvent;
 
 public class WolvSKASkyBlock {
@@ -27,7 +27,7 @@ public class WolvSKASkyBlock {
 		   if (Bukkit.getServer().getPluginManager().getPlugin("ASkyBlock") != null) {
 			   Skript.registerExpression(ExprASkyBlockHomeLocation.class, Location.class, ExpressionType.PROPERTY, "(asb|askyblock) home[ location] of %player%", "(asb|askyblock) %player%['s] home[ location]");
 			   Skript.registerExpression(ExprASkyBlockIslandCount.class, Integer.class, ExpressionType.PROPERTY, "(asb|askyblock) island count");
-			   Skript.registerExpression(ExprASkyBlockIslandLevel.class, Integer.class, ExpressionType.PROPERTY, "(asb|askyblock) [island ]level of %player%", "(asb|askyblock) %player%['s] [island ]level");
+			   Skript.registerExpression(ExprASkyBlockIslandLevel.class, Long.class, ExpressionType.PROPERTY, "(asb|askyblock) [island ]level of %player%", "(asb|askyblock) %player%['s] [island ]level");
 			   Skript.registerExpression(ExprASkyBlockHomeLocation.class, Location.class, ExpressionType.PROPERTY, "(asb|askyblock) island[ location] of %player%", "(asb|askyblock) %player%['s] island[ location]");
 			   Skript.registerExpression(ExprASkyBlockIslandName.class, String.class, ExpressionType.PROPERTY, "(asb|askyblock) island name of %player%", "(asb|askyblock) %player%['s] island name");
 			   Skript.registerExpression(ExprASkyBlockIslandWorld.class, World.class, ExpressionType.PROPERTY, "(asb|askyblock)[ island] world");
@@ -37,10 +37,10 @@ public class WolvSKASkyBlock {
 			   Skript.registerExpression(ExprASkyBlockTeamLeader.class, OfflinePlayer.class, ExpressionType.PROPERTY, "(asb|askyblock)[ team] leader of team of %player%", "(asb|askyblock) %player%['s][ team] leader");
 			   Skript.registerExpression(ExprASkyBlockTeamMembers.class, OfflinePlayer.class, ExpressionType.PROPERTY, "(asb|askyblock)[ team] members of team of %player%", "(asb|askyblock) %player%['s] team members");
 			   Skript.registerExpression(ExprASkyBlockTopTen.class, OfflinePlayer.class, ExpressionType.PROPERTY, "(asb|askyblock) top (ten|10)");
-			   Skript.registerCondition(CondASkyBlockHasIsland.class, "%player% has[ a[n]] (asb|askyblock) island");
-			   Skript.registerCondition(CondASkyBlockHasTeam.class, "%player% (has|is in)[ a[n]] (asb|askyblock) team");
-			   Skript.registerCondition(CondASkyBlockIsCoop.class, "%player% is (asb|askyblock) coop");
-			   Skript.registerCondition(CondASkyBlockIslandAt.class, "there is [a[n]] (asb|askyblock) island at %location%");
+			   Skript.registerCondition(CondASkyBlockHasIsland.class, "%player% has[ a[n]] (asb|askyblock) island", "%player% has(n't| not)[ a[n]] (asb|askyblock) island");
+			   Skript.registerCondition(CondASkyBlockHasTeam.class, "%player% (has|is in)[ a[n]] (asb|askyblock) team", "%player% (has(n't| not)|is(n't not) in)[ a[n]] (asb|askyblock) team");
+			   Skript.registerCondition(CondASkyBlockIsCoop.class, "%player% is (asb|askyblock) coop", "%player% is(n't| not) (asb|askyblock) coop");
+			   Skript.registerCondition(CondASkyBlockIslandAt.class, "there is [a[n]] (asb|askyblock) island at %location%", "there is(n't| not) [a[n]] (asb|askyblock) island at %location%");
 			   Skript.registerEffect(EffASkyBlockCalculateLevel.class, "asb calculate level of %player%");
 			   Skript.registerEvent("Coop Join Event", SimpleEvent.class, CoopJoinEvent.class, "asb coop join");
 			   EventValues.registerEventValue(CoopJoinEvent.class, Player.class, new Getter<Player, CoopJoinEvent>() {
@@ -97,20 +97,20 @@ public class WolvSKASkyBlock {
 					   return e.getIslandLocation();
 				   }
 			   }, 0);
-			   Skript.registerEvent("Island Level Event", SimpleEvent.class, IslandLevelEvent.class, "asb[ island] level[ change]");
-			   EventValues.registerEventValue(IslandLevelEvent.class, Player.class, new Getter<Player, IslandLevelEvent>() {
-				   public Player get(IslandLevelEvent e) {
+			   Skript.registerEvent("Island Level Event", SimpleEvent.class, IslandPostLevelEvent.class, "asb[ island] level[ change]");
+			   EventValues.registerEventValue(IslandPostLevelEvent.class, Player.class, new Getter<Player, IslandPostLevelEvent>() {
+				   public Player get(IslandPostLevelEvent e) {
 					   return fr.nashoba24.wolvsk.WolvSK.getInstance().getServer().getPlayer(e.getPlayer());
 				   }
 			   }, 0);
-			   EventValues.registerEventValue(IslandLevelEvent.class, Location.class, new Getter<Location, IslandLevelEvent>() {
-				   public Location get(IslandLevelEvent e) {
+			   EventValues.registerEventValue(IslandPostLevelEvent.class, Location.class, new Getter<Location, IslandPostLevelEvent>() {
+				   public Location get(IslandPostLevelEvent e) {
 					   return e.getIslandLocation();
 				   }
 			   }, 0);
-			   EventValues.registerEventValue(IslandLevelEvent.class, Integer.class, new Getter<Integer, IslandLevelEvent>() {
-				   public Integer get(IslandLevelEvent e) {
-					   return e.getLevel();
+			   EventValues.registerEventValue(IslandPostLevelEvent.class, Long.class, new Getter<Long, IslandPostLevelEvent>() {
+				   public Long get(IslandPostLevelEvent e) {
+					   return e.getLongLevel();
 				   }
 			   }, 0);
 			   Skript.registerEvent("Island New Event", SimpleEvent.class, IslandNewEvent.class, "asb new[ island]");
