@@ -20,6 +20,7 @@ public class CondASkyBlockIslandAt extends Condition {
     @Override
     public boolean init(Expression<?>[] expr, int i, Kleenean kl, ParseResult pr) {
         loc = (Expression<Location>) expr[0];
+        setNegated(i == 1);
         return true;
     }
 
@@ -30,12 +31,10 @@ public class CondASkyBlockIslandAt extends Condition {
 
     @Override
     public boolean check(Event e) {
-        if(ASkyBlockAPI.getInstance().islandAtLocation(loc.getSingle(e))) {
-        	return true;
-        }
-        else {
-        	return false;
-        }
+    	if(loc.getSingle(e)!=null) {
+	        return isNegated() ? !ASkyBlockAPI.getInstance().islandAtLocation(loc.getSingle(e)) : ASkyBlockAPI.getInstance().islandAtLocation(loc.getSingle(e));
+    	}
+    	return isNegated();
     }
 
 }

@@ -20,6 +20,7 @@ public class CondInArena extends Condition {
     public boolean init(Expression<?>[] expr, int i, Kleenean kl, ParseResult pr) {
         player = (Expression<Player>) expr[0];
         arena = (Expression<Arena>) expr[1];
+        setNegated(i == 1);
         return true;
     }
 
@@ -31,9 +32,9 @@ public class CondInArena extends Condition {
     @Override
     public boolean check(Event e) {
     	if(arena.getSingle(e)!=null && player.getSingle(e)!=null) {
-    		return arena.getSingle(e).isInArena(player.getSingle(e));
+    		return isNegated() ? !arena.getSingle(e).isInArena(player.getSingle(e)) : arena.getSingle(e).isInArena(player.getSingle(e));
     	}
-    	return false;
+    	return isNegated();
     }
 
 }

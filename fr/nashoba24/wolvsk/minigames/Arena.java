@@ -137,7 +137,7 @@ public class Arena {
 	
 	public void finish() {
 		if(this.isStarted()) {
-			if(this.playersCount()==0 || this.playersCount()==1) {
+			if(this.playersCount()==0 || (this.playersCount()==1 && this.getMin()>1)) {
 				Minigames.stop(this.getMinigame(), this);
 				countdown = defaulttimer;
 			}
@@ -145,7 +145,13 @@ public class Arena {
 	}
 	
 	public void countdown() {
+		if(this.isStarted()) {
+			return;
+		}
 		if(this.playersCount()>=this.getMin()) {
+			if(countdown<1) {
+				countdown = defaulttimer;
+			}
 			--countdown;
 			if(countdown==0) {
 				boolean s = Minigames.start(this.getMinigame(), this, false);
@@ -325,5 +331,9 @@ public class Arena {
         		}
         	}
         }, 1L);
+	}
+	
+	public void setCountdown(Integer i) {
+		this.countdown = i;
 	}
 }

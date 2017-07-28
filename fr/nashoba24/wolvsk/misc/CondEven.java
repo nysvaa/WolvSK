@@ -18,6 +18,7 @@ public class CondEven extends Condition {
     @Override
     public boolean init(Expression<?>[] expr, int i, Kleenean kl, ParseResult pr) {
         number = (Expression<Number>) expr[0];
+        setNegated(i == 1);
         return true;
     }
 
@@ -28,12 +29,7 @@ public class CondEven extends Condition {
 
     @Override
     public boolean check(Event e) {
-    	if((number.getSingle(e).intValue() & 1) == 0) {
-    		return true;
-    	}
-    	else {
-    		return false;
-    	}
+    	return isNegated() ? !((number.getSingle(e).intValue() & 1) == 0) : ((number.getSingle(e).intValue() & 1) == 0);
     }
 
 }

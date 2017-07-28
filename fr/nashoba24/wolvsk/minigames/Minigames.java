@@ -159,6 +159,10 @@ public class Minigames implements Listener, CommandExecutor {
 		else {
 			if(arena.getMinigame()==mg) {
 				arena.setStarted(true);
+				for(Player p : arena.getAllPlayers()) {
+					p.setLevel(0);
+					p.setExp(0F);
+				}
 				WolvSK.getInstance().getServer().getPluginManager().callEvent(new ArenaStartEvent(mg, arena));
 				arena.updateSigns();
 				return true;
@@ -172,6 +176,7 @@ public class Minigames implements Listener, CommandExecutor {
 	public static boolean stop(Minigame mg, Arena arena) {
 		if(arena.getMinigame()==mg) {
 			arena.setStarted(false);
+			arena.setCountdown(arena.getDefaultTimer());
 			Player[] list = arena.getAllPlayers();
 			for(Player p : list) {
 				Minigames.leave(p, true, false, null);
@@ -1243,9 +1248,9 @@ public class Minigames implements Listener, CommandExecutor {
 		   Skript.registerEffect(EffMakeLeaveArena.class, "make %player% leave[ current] arena");
 		   Skript.registerEffect(EffCreateArena.class, "create[ a[n]] arena[ named] %string% with min[imum][ player[s]] %integer%(,| and) max[imum][ player[s]] %integer% (for|in) %minigame%");
 		   Skript.registerEffect(EffArenaBroadcast.class, "broadcast [message ]%string% in %arena%");
-		   Skript.registerCondition(CondInGame.class, "%player% is in (a[n] arena|[a ]game)");
-		   Skript.registerCondition(CondInArena.class, "%player% is in %arena%");
-		   Skript.registerCondition(CondIsStarted.class, "%arena% is started");
+		   Skript.registerCondition(CondInGame.class, "%player% is in (a[n] arena|[a ]game)", "player% is(n't| not) in (a[n] arena|[a ]game)");
+		   Skript.registerCondition(CondInArena.class, "%player% is in %arena%", "%player% is(n't| not) in %arena%");
+		   Skript.registerCondition(CondIsStarted.class, "%arena% is started", "%arena% is(n't| not) started");
 		   Skript.registerExpression(ExprMinigameByName.class, Minigame.class, ExpressionType.PROPERTY, "minigame %string%");
 		   Skript.registerExpression(ExprAllMinigames.class, Minigame.class, ExpressionType.PROPERTY, "[all ]minigames");
 		   Skript.registerExpression(ExprMinigamePlayer.class, Minigame.class, ExpressionType.PROPERTY, "[current ]minigame of %player%", "%player%['s] [current ]minigame");

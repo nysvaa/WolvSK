@@ -17,6 +17,7 @@ public class CondIsStarted extends Condition {
     @Override
     public boolean init(Expression<?>[] expr, int i, Kleenean kl, ParseResult pr) {
         arena = (Expression<Arena>) expr[0];
+        setNegated(i == 1);
         return true;
     }
 
@@ -28,9 +29,9 @@ public class CondIsStarted extends Condition {
     @Override
     public boolean check(Event e) {
     	if(arena.getSingle(e)!=null) {
-    		return arena.getSingle(e).isStarted();
+    		return isNegated() ? !arena.getSingle(e).isStarted() : arena.getSingle(e).isStarted();
     	}
-    	return false;
+    	return isNegated();
     }
 
 }

@@ -28,7 +28,7 @@ public class CondInGame extends Condition {
 
     @Override
     public boolean check(Event e) {
-    	return Minigames.inGame(player.getSingle(e));
+    	return isNegated() ? !Minigames.inGame(player.getSingle(e)) : Minigames.inGame(player.getSingle(e));
     }
 
 }

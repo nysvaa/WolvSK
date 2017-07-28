@@ -20,49 +20,38 @@ public class CondCooldownFinish extends Condition {
     @SuppressWarnings("unchecked")
     @Override
     public boolean init(Expression<?>[] expr, int i, Kleenean kl, ParseResult pr) {
-		if(i==1) {
+		if(i==1 || i==3) {
 			name = (Expression<String>) expr[0];
 			player = (Expression<Player>) expr[1];
 			pl = true;
 		}
-		else if(i==0) {
+		else if(i==0 || i==2) {
 			name = (Expression<String>) expr[0];
 		}
+		setNegated(i == 2 || i == 3);
         return true;
     }
 
     @Override
     public String toString(@Nullable Event e, boolean b) {
-        return "cooldown is finish";
+        return "cooldown is finished";
     }
 
     @Override
     public boolean check(Event e) {
     	if(pl) {
-    		if(WolvSK.cooldowns.containsKey(name.getSingle(e) + "." + player.getSingle(e).getName())) {
-    			if(WolvSK.cooldowns.get(name.getSingle(e) + "." + player.getSingle(e).getName())<System.currentTimeMillis()) {
-    				return true;
-    			}
-    			else {
-    				return false;
-    			}
+    		if(player.getSingle(e)!=null) {
+	    		if(WolvSK.cooldowns.containsKey(name.getSingle(e) + "." + player.getSingle(e).getName())) {
+	    			return isNegated() ? !(WolvSK.cooldowns.get(name.getSingle(e) + "." + player.getSingle(e).getName())<System.currentTimeMillis()) : (WolvSK.cooldowns.get(name.getSingle(e) + "." + player.getSingle(e).getName())<System.currentTimeMillis());
+	    		}
     		}
-    		else {
-    			return true;
-    		}
+	    	return !isNegated();
     	}
     	else {
     		if(WolvSK.cooldowns.containsKey(name.getSingle(e))) {
-    			if(WolvSK.cooldowns.get(name.getSingle(e))<System.currentTimeMillis()) {
-    				return true;
-    			}
-    			else {
-    				return false;
-    			}
+    			return isNegated() ? !(WolvSK.cooldowns.get(name.getSingle(e))<System.currentTimeMillis()) : (WolvSK.cooldowns.get(name.getSingle(e))<System.currentTimeMillis());
     		}
-    		else {
-    			return true;
-    		}
+    		return !isNegated();
     	}
     }
 

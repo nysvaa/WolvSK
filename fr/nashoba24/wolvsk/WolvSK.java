@@ -17,7 +17,6 @@ import fr.nashoba24.wolvsk.minigames.Minigames;
 import fr.nashoba24.wolvsk.misc.WolvSKMisc;
 import fr.nashoba24.wolvsk.playerpoints.WolvSKPlayerPoints;
 import fr.nashoba24.wolvsk.pvparena.WolvSKPvpArena;
-import fr.nashoba24.wolvsk.quests.WolvSKQuests;
 import fr.nashoba24.wolvsk.serverquery.WolvSKPing;
 import fr.nashoba24.wolvsk.supertrails.WolvSKSuperTrails;
 import fr.nashoba24.wolvsk.wolvmc.WolvSKWolvMC;
@@ -52,7 +51,6 @@ public class WolvSK extends JavaPlugin implements Listener {
 		   WolvSKWolvMC.registerAll();
 		   WolvSKPlayerPoints.registerAll();
 		   WolvSKMaths.registerAll();
-		   //WolvSKQuests.registerAll();
 		   Bukkit.getPluginManager().registerEvents(new Minigames(), this);
 		   getCommand("minigames").setExecutor(new Minigames());
 		   Minigames.registerAll();

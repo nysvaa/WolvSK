@@ -28,12 +28,7 @@ public class CondOdd extends Condition {
 
     @Override
     public boolean check(Event e) {
-    	if((number.getSingle(e).intValue() & 1) == 1) {
-    		return true;
-    	}
-    	else {
-    		return false;
-    	}
+    	return isNegated() ? !((number.getSingle(e).intValue() & 1) == 1) : ((number.getSingle(e).intValue() & 1) == 1);
     }
 
 }

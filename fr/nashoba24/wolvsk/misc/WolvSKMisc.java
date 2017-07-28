@@ -1,16 +1,10 @@
 package fr.nashoba24.wolvsk.misc;
 
-import java.util.HashMap;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.scheduler.BukkitScheduler;
-
 import ch.njol.skript.Skript;
 import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.util.SimpleEvent;
@@ -38,15 +32,13 @@ import fr.nashoba24.wolvsk.misc.spectate.EffUnspectate1_9_R2;
 
 public class WolvSKMisc implements Listener {
 	
-	public static HashMap<String, Integer> lastDeath = new HashMap<String, Integer>();
-	public static String[] insults = new String[]{"srx", "ptn", "fdp", "ntm", "wtf", "pd"};
-
 	public static void registerAll() {
 		   Skript.registerExpression(ExprBlockPower.class, Integer.class, ExpressionType.PROPERTY, "power of %block%", "%block%['s] power");
-		   Skript.registerCondition(CondOdd.class, "%number% is odd");
-		   Skript.registerCondition(CondEven.class, "%number% is even");
-		   Skript.registerCondition(CondCooldownFinish.class, "cooldown %string% is finish", "cooldown %string% of %player% is finish");
+		   Skript.registerCondition(CondOdd.class, "%number% is odd", "%number% is(n't| not) odd");
+		   Skript.registerCondition(CondEven.class, "%number% is even", "%number% is(n't| not) even");
+		   Skript.registerCondition(CondCooldownFinish.class, "cooldown %string% is finish[ed]", "cooldown %string% of %player% is finish[ed]", "cooldown %string% is(n't| not) finish[ed]", "cooldown %string% of %player% is(n't| not) finish[ed]");
 		   Skript.registerEffect(EffCreateCooldown.class, "create cooldown %string% for %timespan%", "create cooldown %string% (for|of) %player% for %timespan%");
+		   Skript.registerEffect(EffCreateCooldown.class, "delete cooldown %string%", "delete cooldown %string% (for|of) %player%");
 		   Skript.registerExpression(ExprCooldownLeftTime.class, Timespan.class, ExpressionType.PROPERTY, "cooldown[ left][ time] %string%", "cooldown[ left][ time] %string% of %player%");
 		   Skript.registerExpression(ExprCountry.class, String.class, ExpressionType.PROPERTY, "country of ip %string%", "country of %player%", "country code of ip %string%", "country code of %player%", "ip %string%['s] country", "%player%['s] country", "ip %string%['s] country code", "%player%['s] country code");
 		   Skript.registerExpression(ExprRandomUUID.class, UUID.class, ExpressionType.PROPERTY, "[a ]random uuid");
@@ -57,7 +49,6 @@ public class WolvSKMisc implements Listener {
 		   Skript.registerExpression(ExprReturnOfMethodWithoutParams.class, Object.class, ExpressionType.PROPERTY, "return of (function|method) %string% [without param[meter][s]] in class[ named] %string%");
 		   Skript.registerEffect(EffCallMethodWithParams.class, "call (function|method) %string% with param[meter][s] %objects% in class[ named] %string%");
 		   Skript.registerEffect(EffCallMethodWithoutParams.class, "call (function|method) %string% [without param[meter][s]] in class[ named] %string%");
-		   Skript.registerEvent("Rage Event", SimpleEvent.class, PlayerRageEvent.class, "[player ]rage");
 		   WolvSKAnvilGUI.registerAll();
 		   String version = WolvSK.getInstance().getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
 		   switch(version) {
@@ -97,11 +88,6 @@ public class WolvSKMisc implements Listener {
 		   /////////////////////
 		   //Skript.registerEffect(EffMakeEntityGlow.class, "make %entity% glow for %players%");//TODO
 		   /////////////////////
-		   EventValues.registerEventValue(PlayerRageEvent.class, Player.class, new Getter<Player, PlayerRageEvent>() {
-			   public Player get(PlayerRageEvent e) {
-				   return e.getPlayer();
-			   }
-		   }, 0);
 		   if(Bukkit.getServer().getPluginManager().getPlugin("ProtocolLib") != null) {
 			   WolvSKSteer.registerSteer();
 			   ExprClientVersion.registerClientVersion();
@@ -137,31 +123,5 @@ public class WolvSKMisc implements Listener {
 				   }
 			   }, 0);
 		   }
-	}
-	
-	@EventHandler
-	public void onRage(AsyncPlayerChatEvent e) {
-		if(lastDeath.containsKey(e.getPlayer().getName())) {
-			for(String s : insults) {
-				if(e.getMessage().contains(s)) {
-					WolvSK.getInstance().getServer().getPluginManager().callEvent(new PlayerRageEvent(e.getPlayer()));
-				}
-			}
-		}
-	}
-	
-	@EventHandler
-	public void onDeath(final PlayerDeathEvent e) {
-		if(lastDeath.containsKey(e.getEntity().getName())) {
-			Bukkit.getServer().getScheduler().cancelTask(lastDeath.get(e.getEntity().getName()));
-		}
-		BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
-		int t = scheduler.scheduleSyncDelayedTask(WolvSK.getPlugin(WolvSK.class), new Runnable() {
-			@Override
-			public void run() {
-				WolvSKMisc.lastDeath.remove(e.getEntity().getName());
-			}
-		}, 20 * 15L);
-		WolvSKMisc.lastDeath.put(e.getEntity().getName(), t);
 	}
 }

@@ -20,6 +20,7 @@ public class CondASkyBlockIsCoop extends Condition {
     @Override
     public boolean init(Expression<?>[] expr, int i, Kleenean kl, ParseResult pr) {
         player = (Expression<Player>) expr[0];
+        setNegated(i == 1);
         return true;
     }
 
@@ -30,12 +31,10 @@ public class CondASkyBlockIsCoop extends Condition {
 
     @Override
     public boolean check(Event e) {
-        if(ASkyBlockAPI.getInstance().isCoop(player.getSingle(e))) {
-        	return true;
-        }
-        else {
-        	return false;
-        }
+    	if(player.getSingle(e)!=null) {
+	        return isNegated() ? !ASkyBlockAPI.getInstance().isCoop(player.getSingle(e)) : ASkyBlockAPI.getInstance().isCoop(player.getSingle(e));
+    	}
+    	return isNegated();
     }
 
 }
