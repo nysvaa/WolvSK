@@ -23,6 +23,7 @@ public class CondEssentialsIgnore extends Condition {
     public boolean init(Expression<?>[] expr, int i, Kleenean kl, ParseResult pr) {
         player1 = (Expression<Player>) expr[0];
         player2 = (Expression<Player>) expr[1];
+        setNegated(i == 1);
         return true;
     }
 
@@ -37,10 +38,10 @@ public class CondEssentialsIgnore extends Condition {
     	User user = ess.getUser(player1.getSingle(e));
     	if(user==null) { return false; }
         if(user._getIgnoredPlayers().contains(player2.getSingle(e).getName().toLowerCase())) {
-        	return true;
+        	return isNegated() ? false : true;
         }
         else {
-        	return false;
+        	return isNegated() ? true : false;
         }
     }
 

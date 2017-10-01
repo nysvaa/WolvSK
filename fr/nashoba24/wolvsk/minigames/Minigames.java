@@ -1248,7 +1248,7 @@ public class Minigames implements Listener, CommandExecutor {
 		   Skript.registerEffect(EffMakeLeaveArena.class, "make %player% leave[ current] arena");
 		   Skript.registerEffect(EffCreateArena.class, "create[ a[n]] arena[ named] %string% with min[imum][ player[s]] %integer%(,| and) max[imum][ player[s]] %integer% (for|in) %minigame%");
 		   Skript.registerEffect(EffArenaBroadcast.class, "broadcast [message ]%string% in %arena%");
-		   Skript.registerCondition(CondInGame.class, "%player% is in (a[n] arena|[a ]game)", "player% is(n't| not) in (a[n] arena|[a ]game)");
+		   Skript.registerCondition(CondInGame.class, "%player% is in (a[n] arena|[a ]game)", "%player% is(n't| not) in (a[n] arena|[a ]game)");
 		   Skript.registerCondition(CondInArena.class, "%player% is in %arena%", "%player% is(n't| not) in %arena%");
 		   Skript.registerCondition(CondIsStarted.class, "%arena% is started", "%arena% is(n't| not) started");
 		   Skript.registerExpression(ExprMinigameByName.class, Minigame.class, ExpressionType.PROPERTY, "minigame %string%");

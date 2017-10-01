@@ -34,18 +34,18 @@ public class WolvSKEssentials {
 					   return e.getAffected().getBase();
 				   }
 			   }, 0);
-			   Skript.registerCondition(CondEssentialsAFK.class, "%player% is afk");
-			   Skript.registerCondition(CondEssentialsCanBuild.class, "%player% can build");
-			   Skript.registerCondition(CondEssentialsCanInteractVanish.class, "%player% can interact vanish");
-			   Skript.registerCondition(CondEssentialsHasHome.class, "%player% ha(s|ve)[ a[n]] home");
-			   Skript.registerCondition(CondEssentialsHasPowertools.class, "%player% ha(s|ve) powertool[s]");
-			   Skript.registerCondition(CondEssentialsIgnore.class, "%player% (ignore|is ignoring) %player%");
-			   Skript.registerCondition(CondEssentialsIsJailed.class, "%player% is jail[ed]");
-			   Skript.registerCondition(CondEssentialsIsMuted.class, "%player% is mute[d]");
-			   Skript.registerCondition(CondEssentialsPowerToolsEnabled.class, "%player% ha(s|ve) powertool[s] enable[d]");
-			   Skript.registerCondition(CondEssentialsSocialSpyEnabled.class, "%player% ha(s|ve) social spy[ enable[d]]");
-			   Skript.registerCondition(CondEssentialsGodMode.class, "%player% is[ in] god[ mode]");
-			   Skript.registerCondition(CondEssentialsVanish.class, "%player% is vanish[ed]"); //Ajouter support SuperVanish
+			   Skript.registerCondition(CondEssentialsAFK.class, "%player% is afk", "%player% is(n't| not) afk");
+			   Skript.registerCondition(CondEssentialsCanBuild.class, "essentials %player% can build", "essentials %player% cannot build");
+			   Skript.registerCondition(CondEssentialsCanInteractVanish.class, "%player% can interact vanish", "%player% cannot interact vanish");
+			   Skript.registerCondition(CondEssentialsHasHome.class, "%player% ha(s|ve)[ a[n]] home", "%player% does(n't| not) ha(s|ve)[ a[n]] home", "%player% ha(s|ve)(n't| not)[ a[n]] home");
+			   Skript.registerCondition(CondEssentialsHasPowertools.class, "%player% ha(s|ve) powertool[s]", "%player% does(n't| not) ha(s|ve) powertool[s]", "%player% ha(s|ve)(n't| not) powertool[s]");
+			   Skript.registerCondition(CondEssentialsIgnore.class, "%player% (ignore|is ignoring) %player%", "%player% does(n't| not) ignore %player%");
+			   Skript.registerCondition(CondEssentialsIsJailed.class, "%player% is jail[ed]", "%player% is(n't| not) jail[ed]");
+			   Skript.registerCondition(CondEssentialsIsMuted.class, "%player% is mute[d]", "%player% is(n't| not) muted");
+			   Skript.registerCondition(CondEssentialsPowerToolsEnabled.class, "%player% ha(s|ve) powertool[s] enable[d]", "%player% does(n't| not) ha(s|ve) powertool[s] enable[d]", "%player% ha(s|ve)(n't| not) powertool[s] enable[d]");
+			   Skript.registerCondition(CondEssentialsSocialSpyEnabled.class, "%player% ha(s|ve) social spy[ enable[d]]", "%player% does(n't| not) ha(s|ve) social spy[ enable[d]]", "%player% ha(s|ve)(n't| not) social spy[ enable[d]]");
+			   Skript.registerCondition(CondEssentialsGodMode.class, "%player% is[ in] god[ mode]", "%player% is(n't| not)[ in] god[ mode]");
+			   Skript.registerCondition(CondEssentialsVanish.class, "%player% is vanish[ed]", "%player% is(n't| not) vanish[ed]");
 			   Skript.registerExpression(ExprEssentialsHomes.class, String.class, ExpressionType.PROPERTY, "homes of %player%", "%player%['s] homes");
 			   Skript.registerExpression(ExprEssentialsHome.class, Location.class, ExpressionType.PROPERTY, "home %string% of %player%", "%player%['s] home %string%");
 			   Skript.registerExpression(ExprEssentialsHome.class, Location.class, ExpressionType.PROPERTY, "home of %player%", "%player%['s] home");

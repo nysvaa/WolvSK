@@ -21,6 +21,7 @@ public class CondEssentialsAFK extends Condition {
     @Override
     public boolean init(Expression<?>[] expr, int i, Kleenean kl, ParseResult pr) {
         player = (Expression<Player>) expr[0];
+        setNegated(i == 1);
         return true;
     }
 
@@ -34,7 +35,7 @@ public class CondEssentialsAFK extends Condition {
     	Essentials ess = ((Essentials) WolvSK.getInstance().getServer().getPluginManager().getPlugin("Essentials"));
     	User user = ess.getUser(player.getSingle(e));
     	if(user==null) { return false; }
-    	return user.isAfk();
+    	return isNegated() ? !user.isAfk() : user.isAfk();
     }
 
 }
