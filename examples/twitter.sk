@@ -1,10 +1,10 @@
 on skript load:
     twitter debug connect with consumer key consumer key", consumer secret "consumer secret", access token "access token" and secret token "secret token"
 command /winevent <player>:
-    trigger:
-      if player is op:
-        broadcast "%player% won the event!"
-        tweet "Winner of the today's event: %player%"
+	trigger:
+		if player is op:
+			broadcast "%argument 1% won the event!"
+			tweet "Winner of the today's event: %argument 1%"
 
 command /mentiontimeline:
 	trigger:
