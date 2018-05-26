@@ -12,7 +12,6 @@ import fr.nashoba24.wolvsk.playerpoints.WolvSKPlayerPoints;
 import fr.nashoba24.wolvsk.pvparena.WolvSKPvpArena;
 import fr.nashoba24.wolvsk.serverquery.WolvSKPing;
 import fr.nashoba24.wolvsk.supertrails.WolvSKSuperTrails;
-import fr.nashoba24.wolvsk.wolvmc.WolvSKWolvMC;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -75,7 +74,6 @@ public class WolvSK extends JavaPlugin {
 		config.addDefault("pvparena", true);
 		config.addDefault("ping", true);
 		config.addDefault("supertrails", true);
-		config.addDefault("wolvmc", true);
 		config.addDefault("playerpoints", true);
 		config.addDefault("maths", true);
 		config.addDefault("minigames", true);
@@ -104,9 +102,6 @@ public class WolvSK extends JavaPlugin {
 		}
 		if (config.getBoolean("supertrails")) {
 			WolvSKSuperTrails.register();
-		}
-		if (config.getBoolean("wolvmc")) {
-			WolvSKWolvMC.register();
 		}
 		if (config.getBoolean("playerpoints")) {
 			WolvSKPlayerPoints.register();
