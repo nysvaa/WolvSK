@@ -138,34 +138,39 @@ public class AnvilGUI implements Listener {
         if(items[SLOT_INPUT_LEFT] == null) {
             setInputName("-");
         }
-        String version = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
-        switch(version) {
-        	case "v1_8_R1":
-        		inv = AnvilNMS1_8_R1.open(this);
-        		break;
-        	case "v1_8_R2":
-        		inv = AnvilNMS1_8_R2.open(this);
-		   		break;
-		   	case "v1_8_R3":
-		   		inv = AnvilNMS1_8_R3.open(this);
-		   		break;
-			case "v1_9_R1":
-				inv = AnvilNMS1_9_R1.open(this);
-		   		break;
-			case "v1_9_R2":
-				inv = AnvilNMS1_9_R2.open(this);
-		   		break;
-			case "v1_10_R1":
-				inv = AnvilNMS1_10_R1.open(this);
-		   		break;
-			case "v1_11_R1":
-				inv = AnvilNMS1_11_R1.open(this);
-	 			break;
-			case "v1_12_R1":
-				inv = AnvilNMS1_12_R1.open(this);
-	 			break;
-	 		default:
-	 			Bukkit.getLogger().warning("You can't open anvil GUI because your Minecraft version is not supported!");
+        if(Bukkit.getVersion().contains("1.12.2")) {
+			inv = AnvilNMS1_12_2_R1.open(this);
+        }
+        else {
+	        String version = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
+	        switch(version) {
+	        	case "v1_8_R1":
+	        		inv = AnvilNMS1_8_R1.open(this);
+	        		break;
+	        	case "v1_8_R2":
+	        		inv = AnvilNMS1_8_R2.open(this);
+			   		break;
+			   	case "v1_8_R3":
+			   		inv = AnvilNMS1_8_R3.open(this);
+			   		break;
+				case "v1_9_R1":
+					inv = AnvilNMS1_9_R1.open(this);
+			   		break;
+				case "v1_9_R2":
+					inv = AnvilNMS1_9_R2.open(this);
+			   		break;
+				case "v1_10_R1":
+					inv = AnvilNMS1_10_R1.open(this);
+			   		break;
+				case "v1_11_R1":
+					inv = AnvilNMS1_11_R1.open(this);
+		 			break;
+				case "v1_12_R1":
+					inv = AnvilNMS1_12_R1.open(this);
+		 			break;
+		 		default:
+		 			Bukkit.getLogger().warning("You can't open anvil GUI because your Minecraft version is not supported!");
+	        }
         }
         Bukkit.getPluginManager().registerEvents(listener, plugin);
         return this;

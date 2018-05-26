@@ -9,7 +9,7 @@ import java.lang.reflect.Field;
 /**
  * Created by chasechocolate.
  */
-public class AnvilNMS1_12_R1 {
+public class AnvilNMS1_12_2_R1 {
     public static class AnvilContainer extends ContainerAnvil {
         private static Field fieldText;
 
@@ -29,13 +29,10 @@ public class AnvilNMS1_12_R1 {
 
             this.menu = menu;
         }
-
-        /**
-         * No EXP required to use
-         */
+        
         @Override
-        public boolean a(EntityHuman human){
-            return true;
+        public boolean canUse(EntityHuman entityhuman) {
+        	return true;
         }
 
         @Override
