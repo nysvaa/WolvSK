@@ -7,7 +7,7 @@ on close anvil gui named "Test":
 
 command /testgui:
 	trigger:
-		open anvil gui named "Hey" to player with default text "&4How are you %player%?" and item golden sword with lore "Type what you want||in the text input :p||(but don't swear please)"
+		open anvil gui named "Hey" to player with default text "&4How are you %player%?" and item golden sword
 
 on close anvil gui named "Hey":
 	broadcast "%player% answer: %event-text%"
