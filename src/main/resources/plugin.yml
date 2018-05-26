@@ -1,9 +1,9 @@
 name: WolvSK
 main: fr.nashoba24.wolvsk.WolvSK
 author: Nashoba24
-version: 1.5.8
+version: 1.6.0
 depends: [Skript]
-softdepend: [ASkyBlock, EssentialsX, GuardianBeamAPI, PlayerPoints, ProtocolLib, SuperTrails, WolvMC]
+softdepend: [ASkyBlock, EssentialsX, GuardianBeamAPI, PlayerPoints, ProtocolLib, SuperTrails]
 commands:
   minigames:
     description: Minigames command
