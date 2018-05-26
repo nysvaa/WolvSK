@@ -50,7 +50,7 @@ public class EffASkyBlockCalculateLevel extends Effect {
 		Player asker = player.getSingle(e);
         if (!onLevelWaitTime(asker) || Settings.levelWait <= 0) {
             setLevelWaitTime(asker);
-            new LevelCalcByChunk(ASkyBlock.getPlugin(), asker.getUniqueId(), Bukkit.getServer().getConsoleSender(), false);
+            new LevelCalcByChunk(ASkyBlock.getPlugin(), ASkyBlock.getPlugin().getGrid().getIsland(asker.getUniqueId()), asker.getUniqueId(), Bukkit.getServer().getConsoleSender(), false);
         }
 	}
 	

@@ -39,7 +39,7 @@ public class ExprASkyBlockIslandLocation extends SimpleExpression<Location>{
 	@Override
 	@Nullable
 	protected Location[] get(Event e) {
-		return new Location[]{ ASkyBlockAPI.getInstance().getIslandLocation(player.getSingle(e).getUniqueId()) };
+		return new Location[]{ ASkyBlockAPI.getInstance().getIslandOwnedBy(player.getSingle(e).getUniqueId()).getCenter() };
 	}
 }
 
