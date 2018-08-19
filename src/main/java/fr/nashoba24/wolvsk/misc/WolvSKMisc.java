@@ -68,10 +68,11 @@ public class WolvSKMisc implements Listener {
 		   			Skript.registerEffect(EffSpectate1_12_R1.class, "wolvsk make %player% spectate %entity%");
 		   			Skript.registerEffect(EffUnspectate1_12_R1.class, "wolvsk make %player% stop spectating");
 		   			break;
+		   		case "v1_13_R1":
+		   			Skript.registerEffect(EffSpectate1_13_R1.class, "wolvsk make %player% spectate %entity%");
+		   			Skript.registerEffect(EffUnspectate1_13_R1.class, "wolvsk make %player% stop spectating");
+		   			break;
 		   }
-		   /////////////////////
-		   //Skript.registerEffect(EffMakeEntityGlow.class, "make %entity% glow for %players%");//TODO
-		   /////////////////////
 		   if(Bukkit.getServer().getPluginManager().getPlugin("ProtocolLib") != null) {
 			   WolvSKSteer.registerSteer();
 			   ExprClientVersion.registerClientVersion();
