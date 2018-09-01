@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>fr.nashoba24</groupId>
     <artifactId>WolvSK</artifactId>
-    <version>1.6.1</version>
+    <version>1.6.2</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <server.jars>${project.basedir}/lib</server.jars>
@@ -199,6 +199,20 @@
             <scope>system</scope>
             <systemPath>${server.jars}/spigot-1.12.2.jar</systemPath>
             <version>1.12.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-1.13</artifactId>
+            <scope>system</scope>
+            <systemPath>${server.jars}/spigot-1.13.jar</systemPath>
+            <version>1.13</version>
+        </dependency>
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-1.13.1</artifactId>
+            <scope>system</scope>
+            <systemPath>${server.jars}/spigot-1.13.1.jar</systemPath>
+            <version>1.13.1</version>
         </dependency>
     </dependencies>
 </project>
