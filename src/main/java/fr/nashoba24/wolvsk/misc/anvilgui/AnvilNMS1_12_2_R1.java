@@ -29,11 +29,6 @@ public class AnvilNMS1_12_2_R1 {
 
             this.menu = menu;
         }
-        
-        @Override
-        public boolean canUse(EntityHuman entityhuman) {
-        	return true;
-        }
 
         @Override
         public void a(String text){
