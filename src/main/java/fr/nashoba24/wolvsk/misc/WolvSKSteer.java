@@ -28,31 +28,26 @@ public class WolvSKSteer {
                         Bukkit.getScheduler().runTask(WolvSK.getInstance(), () -> {
                             WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerLeftEvent(player));
                         });
-                    	// WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerLeftEvent(player));
                     }
                     else if(sideways<0) {
                         Bukkit.getScheduler().runTask(WolvSK.getInstance(), () -> {
                             WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerRightEvent(player));
                         });
-                    	// WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerRightEvent(player));
                     }
                     if(forward>0) {
                         Bukkit.getScheduler().runTask(WolvSK.getInstance(), () -> {
                             WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerForwardEvent(player));
                         });
-                    	// WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerForwardEvent(player));
                     }
                     else if(forward<0) {
                         Bukkit.getScheduler().runTask(WolvSK.getInstance(), () -> {
                             WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerBackwardEvent(player));
                         });
-                    	// WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerBackwardEvent(player));
                     }
                     if(jump) {
                         Bukkit.getScheduler().runTask(WolvSK.getInstance(), () -> {
                             WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerJumpEvent(player));
                         });
-                    	// WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerJumpEvent(player));
                     }
                 }
             }
