@@ -8,6 +8,7 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import fr.nashoba24.wolvsk.WolvSK;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public class WolvSKSteer {
@@ -24,16 +25,16 @@ public class WolvSKSteer {
                     final float forward = packet.getFloat().readSafely(1);
                     final Boolean jump = packet.getBooleans().readSafely(0);
                     if(sideways>0) {
-                    	WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerLeftEvent(player));
+                        Bukkit.getScheduler().runTask(WolvSK.getInstance(), () -> WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerLeftEvent(player)));
                     }
                     else if(sideways<0) {
-                    	WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerRightEvent(player));
+                        Bukkit.getScheduler().runTask(WolvSK.getInstance(), () -> WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerRightEvent(player)));
                     }
                     if(forward>0) {
-                    	WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerForwardEvent(player));
+                        Bukkit.getScheduler().runTask(WolvSK.getInstance(), () -> WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerForwardEvent(player)));
                     }
                     else if(forward<0) {
-                    	WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerBackwardEvent(player));
+                        Bukkit.getScheduler().runTask(WolvSK.getInstance(), () -> WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerBackwardEvent(player)));
                     }
                     if(jump) {
                     	WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerJumpEvent(player));
