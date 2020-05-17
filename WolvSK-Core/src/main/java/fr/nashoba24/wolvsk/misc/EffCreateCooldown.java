@@ -42,7 +42,7 @@ public class EffCreateCooldown extends Effect {
 	@Override
 	protected void execute(Event e) {
 		if(pl) {
-			WolvSK.cooldowns.put(name.getSingle(e) + "." + player.getSingle(e).getName(), System.currentTimeMillis() + time.getSingle(e).getMilliSeconds());
+			WolvSK.cooldowns.put(name.getSingle(e) + "." + player.getSingle(e).getUniqueId(), System.currentTimeMillis() + time.getSingle(e).getMilliSeconds());
 		}
 		else {
 			WolvSK.cooldowns.put(name.getSingle(e), System.currentTimeMillis() + time.getSingle(e).getMilliSeconds());

@@ -38,7 +38,7 @@ public class EffDeleteCooldown extends Effect {
 	@Override
 	protected void execute(Event e) {
 		if(pl) {
-			WolvSK.cooldowns.remove(name.getSingle(e) + "." + player.getSingle(e).getName());
+			WolvSK.cooldowns.remove(name.getSingle(e) + "." + player.getSingle(e).getUniqueId());
 		}
 		else {
 			WolvSK.cooldowns.remove(name.getSingle(e));

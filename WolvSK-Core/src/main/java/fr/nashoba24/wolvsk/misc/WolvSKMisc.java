@@ -19,10 +19,10 @@ public class WolvSKMisc implements Listener {
 		   Skript.registerExpression(ExprBlockPower.class, Integer.class, ExpressionType.PROPERTY, "power of %block%", "%block%['s] power");
 		   Skript.registerCondition(CondOdd.class, "%number% is odd", "%number% is(n't| not) odd");
 		   Skript.registerCondition(CondEven.class, "%number% is even", "%number% is(n't| not) even");
-		   Skript.registerCondition(CondCooldownFinish.class, "cooldown %string% is finish[ed]", "cooldown %string% of %player% is finish[ed]", "cooldown %string% is(n't| not) finish[ed]", "cooldown %string% of %player% is(n't| not) finish[ed]");
-		   Skript.registerEffect(EffCreateCooldown.class, "create cooldown %string% for %timespan%", "create cooldown %string% (for|of) %player% for %timespan%");
-		   Skript.registerEffect(EffCreateCooldown.class, "delete cooldown %string%", "delete cooldown %string% (for|of) %player%");
-		   Skript.registerExpression(ExprCooldownLeftTime.class, Timespan.class, ExpressionType.PROPERTY, "cooldown[ left][ time] %string%", "cooldown[ left][ time] %string% of %player%");
+		Skript.registerCondition(CondCooldownFinish.class, "cooldown %string% is (finish[ed]|over|done)", "cooldown %string% of %player% is (finish[ed]|over|done)", "cooldown %string% is(n't| not) (finish[ed]|over|done)", "cooldown %string% of %player% is(n't| not) (finish[ed]|over|done)");
+		Skript.registerEffect(EffCreateCooldown.class, "create cooldown %string% for %timespan%", "create cooldown %string% (for|of) %player% for %timespan%");
+		Skript.registerEffect(EffCreateCooldown.class, "(delete|reset|finish) cooldown %string%", "(delete|reset|finish) cooldown %string% (for|of) %player%");
+		Skript.registerExpression(ExprCooldownLeftTime.class, Timespan.class, ExpressionType.PROPERTY, "cooldown[ left][ time] %string%", "cooldown[ left][ time] %string% of %player%");
 		   Skript.registerExpression(ExprCountry.class, String.class, ExpressionType.PROPERTY, "country of ip %string%", "country of %player%", "country code of ip %string%", "country code of %player%", "ip %string%['s] country", "%player%['s] country", "ip %string%['s] country code", "%player%['s] country code");
 		   Skript.registerExpression(ExprRandomUUID.class, UUID.class, ExpressionType.PROPERTY, "[a ]random uuid");
 		   Skript.registerExpression(ExprRandomLicenceCode.class, String.class, ExpressionType.PROPERTY, "[a ]random license code");
