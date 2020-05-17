@@ -1,4 +1,5 @@
-target/
-lib/
-.idea/
-WolvSK.iml
+.idea
+*/target
+WolvSK-NMS/*/target
+lib/*
+!lib/.gitkeep
