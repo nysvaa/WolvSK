@@ -7,7 +7,7 @@
     <groupId>fr.nashoba24</groupId>
     <artifactId>WolvSK</artifactId>
     <packaging>pom</packaging>
-    <version>1.7.0</version>
+    <version>1.7.1</version>
     <modules>
         <module>WolvSK-Core</module>
         <module>WolvSK-NMS/1_8_R1</module>

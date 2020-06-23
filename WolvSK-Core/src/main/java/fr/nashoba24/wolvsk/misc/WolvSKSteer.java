@@ -37,7 +37,7 @@ public class WolvSKSteer {
                         Bukkit.getScheduler().runTask(WolvSK.getInstance(), () -> WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerBackwardEvent(player)));
                     }
                     if(jump) {
-                    	WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerJumpEvent(player));
+						Bukkit.getScheduler().runTask(WolvSK.getInstance(), () -> WolvSK.getInstance().getServer().getPluginManager().callEvent(new SteerJumpEvent(player)));
                     }
                 }
             }

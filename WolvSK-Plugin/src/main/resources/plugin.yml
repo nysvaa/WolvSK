@@ -1,7 +1,7 @@
 name: WolvSK
 main: fr.nashoba24.wolvsk.WolvSK
 author: Nashoba24
-version: 1.7.0
+version: 1.7.1
 depend: [Skript]
 softdepend: [ASkyBlock, EssentialsX, GuardianBeamAPI, PlayerPoints, ProtocolLib, SuperTrails]
 api-version: "1.13"

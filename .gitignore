@@ -3,3 +3,4 @@
 WolvSK-NMS/*/target
 lib/*
 !lib/.gitkeep
+**/*.iml
