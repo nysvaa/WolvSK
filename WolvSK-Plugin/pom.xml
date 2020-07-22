@@ -5,7 +5,7 @@
     <parent>
         <artifactId>WolvSK</artifactId>
         <groupId>fr.nashoba24</groupId>
-        <version>1.7.1</version>
+        <version>1.7.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -118,6 +118,12 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>1_15_R1</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>1_16_R1</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
